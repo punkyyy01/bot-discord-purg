@@ -353,16 +353,17 @@ async def update_persona_profile(guild_id: int, profile_id: str, fields: dict):
 # Settings helpers
 async def set_chat_mode(guild_id: int, enabled: bool, channel_id: int | None = None):
     db = await get_db()
-    await db.execute(
-        "INSERT INTO settings (guild_id, chat_mode_enabled, chat_channel_id) VALUES (?, 0, NULL)"
-        " ON CONFLICT(guild_id) DO NOTHING",
-        (guild_id,),
-    )
-    await db.execute(
-        "UPDATE settings SET chat_mode_enabled=?, chat_channel_id=? WHERE guild_id=?",
-        (1 if enabled else 0, channel_id, guild_id),
-    )
-    await db.commit()
+    async with _db_lock:
+        await db.execute(
+            "INSERT INTO settings (guild_id, chat_mode_enabled, chat_channel_id) VALUES (?, 0, NULL)"
+            " ON CONFLICT(guild_id) DO NOTHING",
+            (guild_id,),
+        )
+        await db.execute(
+            "UPDATE settings SET chat_mode_enabled=?, chat_channel_id=? WHERE guild_id=?",
+            (1 if enabled else 0, channel_id, guild_id),
+        )
+        await db.commit()
 
 async def get_chat_settings(guild_id: int):
     db = await get_db()

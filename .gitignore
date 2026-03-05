@@ -8,9 +8,13 @@ __pycache__/
 # Env files
 .env
 .env.*
+!.env.example
 
 # VS Code
 .vscode/
+
+# Database
+data/
 
 # Logs
 *.log

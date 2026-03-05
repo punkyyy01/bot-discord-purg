@@ -42,25 +42,29 @@ Si aparece un error de intents privilegiados, activa "Message Content Intent" o 
 - `.gitignore`: archivos ignorados
 
 ## Siguientes pasos
-Configura la persona del bot:
-- `!persona set name <nombre>`
-- `!persona set lore <texto>`
-- `!persona set personality <rasgos>`
-- `!persona set greeting <saludo>`
-- `!persona view`
+Configura la persona del bot usando slash commands:
 
-Chat:
-- `!chat <mensaje>`: responde con el LLM usando la persona.
-- `!chatmode on|off [channel_id]`: activa respuestas automáticas cuando mencionas al bot o usas su nombre.
+### Gestión de Personalidades
+- `/persona_create`: Abre un formulario para crear un nuevo personaje (nombre, lore, personalidad, acento/frases).
+- `/persona_menu`: Menú desplegable para cambiar la personalidad activa del bot.
+- `/persona_edit`: Edita los campos de una personalidad existente.
+- `/persona_delete`: Elimina una personalidad (excepto la default).
+- `/persona_view`: Muestra la configuración de la personalidad activa.
 
-Slash Commands (funcionan incluso sin Message Content Intent):
-- `/chat <mensaje>`: charla con la persona.
-- `/chatmode <estado> [canal]`: activa/desactiva auto-reply y el canal destino.
-- `/persona_view`: ver configuración actual.
-- `/persona_set_name|_lore|_personality|_greeting`: actualizar campos.
+### Chat
+- `/chat <mensaje>`: Chatea con la personalidad activa del bot (slash command).
+- `!chat <mensaje>`: Igual, pero por comando de prefijo.
+- `!chat clear`: Borra la memoria de conversación (barrera de contexto).
+- `/chatmode <estado> [canal]`: Activa/desactiva auto-reply al mencionar o responder al bot. Opcionalmente restringe a un canal.
+
+### Auto-reply
+Cuando el chatmode está activado, el bot responde automáticamente si:
+- Lo mencionas con @bot.
+- Respondes (reply) a un mensaje del bot.
+
+### Otros
+- `!ping`: Verifica que el bot esté online.
 
 Si los slash commands no aparecen de inmediato:
 - Asegúrate de reinvitar el bot con el scope `applications.commands`.
 - Pon `GUILD_ID=<id-del-servidor>` en `.env` para sincronizar comandos solo en tu servidor y verlos al instante.
-
-Cuéntame qué más funciones quieres y las implemento.

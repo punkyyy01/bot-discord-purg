@@ -2,8 +2,6 @@ import os
 import sys
 import re
 import random
-import asyncio
-from datetime import datetime
 
 import discord
 from discord import app_commands
@@ -13,15 +11,12 @@ from db import (
     init_db,
     close_db,
     increment_command_usage,
-    top_usage,
     get_persona,
     get_persona_profile,
     list_persona_profiles,
-    find_persona_profiles,
     create_persona_profile,
     activate_persona_profile,
     delete_persona_profile,
-    set_persona_field,
     update_persona_profile,
     set_chat_mode,
     get_chat_settings,
@@ -58,7 +53,6 @@ try:
 except LLMError as e:
     print(f"[ERROR] {e}")
     sys.exit(1)
-
 
 # --- UTILIDADES ---
 def chunk_message(text: str, max_length: int = 1900) -> list[str]:
@@ -130,24 +124,35 @@ def build_system_prompt(p: dict) -> str:
     accent = p.get("accent") or ""
     catchphrases = p.get("catchphrases") or ""
 
-    return f"""Actúa EXCLUSIVAMENTE como '{name}' interactuando en un servidor de Discord con otros usuarios.
-Esta es tu única realidad. Entra en personaje de inmediato y nunca rompas la cuarta pared.
+    sections = []
+    sections.append(f"Actúa EXCLUSIVAMENTE como '{name}' interactuando en un servidor de Discord con otros usuarios.")
+    sections.append("Esta es tu única realidad. Entra en personaje de inmediato y nunca rompas la cuarta pared.")
 
-[TU LORE E HISTORIA]
-{lore}
+    if lore:
+        sections.append(f"[TU LORE E HISTORIA]\n{lore}")
 
-[TU PERSONALIDAD]
-{personality}
-- Eres auténtico, testarudo y tienes opiniones fuertes sobre cualquier cosa (incluso si tienes que inventarlas en el momento).
-- Nunca eres neutral. Odias las respuestas políticamente correctas.
-- Jamás te ofreces a ayudar ni usas tono de servicio al cliente. Eres un usuario más charlando.
+    personality_block = "[TU PERSONALIDAD]\n"
+    if personality:
+        personality_block += f"{personality}\n"
+    personality_block += (
+        "- Eres auténtico, testarudo y tienes opiniones fuertes sobre cualquier cosa (incluso si tienes que inventarlas en el momento).\n"
+        "- Nunca eres neutral. Odias las respuestas políticamente correctas.\n"
+        "- Jamás te ofreces a ayudar ni usas tono de servicio al cliente. Eres un usuario más charlando."
+    )
+    sections.append(personality_block)
 
-[TU ESTILO DE ESCRITURA]
-{accent}
-Tus frases típicas: {catchphrases}
-- Escribes respuestas cortas (1 o 2 líneas), como si escribieras rápido desde un teléfono.
-- Ve directo al grano. Cero saludos formales o despedidas.
-"""
+    style_block = "[TU ESTILO DE ESCRITURA]\n"
+    if accent:
+        style_block += f"{accent}\n"
+    if catchphrases:
+        style_block += f"Tus frases típicas: {catchphrases}\n"
+    style_block += (
+        "- Escribes respuestas cortas (1 o 2 líneas), como si escribieras rápido desde un teléfono.\n"
+        "- Ve directo al grano. Cero saludos formales o despedidas."
+    )
+    sections.append(style_block)
+
+    return "\n\n".join(sections)
 
 
 def post_process_reply(text: str) -> str:
@@ -277,6 +282,9 @@ async def on_message(message: discord.Message):
     settings = await get_chat_settings(message.guild.id)
     if not settings["enabled"]:
         return
+    # Respetar restricción de canal si está configurada
+    if settings["channel_id"] and message.channel.id != settings["channel_id"]:
+        return
 
     p = await get_persona(message.guild.id)
     current_text = sanitize_message_for_chat(message.content or "", bot.user.id if bot.user else None)
@@ -297,8 +305,7 @@ async def on_message(message: discord.Message):
         *context_history,
         {"role": "user", "content": texto_con_autor},
     ]
-    
-    # Mostrar "escribiendo..." mientras piensa
+
     async with message.channel.typing():
         try:
             reply = await llm.chat(messages, 0.8, 300)
@@ -322,7 +329,6 @@ async def chat_cmd(ctx: commands.Context, *, mensaje: str):
     if not ctx.guild:
         return
 
-    # Comando para limpiar la memoria
     if mensaje.strip().lower() == "clear":
         await ctx.send("🧹 Memoria de conversación borrada. ¿De qué quieres hablar ahora?")
         return
@@ -335,7 +341,7 @@ async def chat_cmd(ctx: commands.Context, *, mensaje: str):
         *context_history,
         {"role": "user", "content": texto_con_autor},
     ]
-    
+
     async with ctx.typing():
         try:
             reply = await llm.chat(messages, 0.8, 300)
@@ -399,6 +405,7 @@ class PersonaCreateModal(discord.ui.Modal, title="Crear nueva Persona"):
             "name": self.nombre.value or None,
             "lore": self.lore.value or None,
             "personality": self.personalidad.value or None,
+            "accent": self.frases_tipicas.value or None,
             "catchphrases": self.frases_tipicas.value or None,
         }
 
@@ -646,6 +653,92 @@ async def persona_delete_slash(interaction: discord.Interaction):
 
     view = PersonaDeleteView(options)
     await interaction.response.send_message("🗑️ **Eliminar Personalidad**\nElige cuál quieres borrar:", view=view, ephemeral=True)
+
+
+@bot.tree.command(name="chat", description="Chatea con la personalidad activa del bot.")
+@app_commands.describe(mensaje="Tu mensaje para el bot")
+async def chat_slash(interaction: discord.Interaction, mensaje: str):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    await increment_command_usage("chat")
+
+    p = await get_persona(interaction.guild.id)
+    texto_con_autor = f"[{interaction.user.display_name}] dice: {mensaje}"
+    messages = [
+        {"role": "system", "content": build_system_prompt(p)},
+        {"role": "user", "content": texto_con_autor},
+    ]
+
+    await interaction.response.defer()
+    try:
+        reply = await llm.chat(messages, 0.8, 300)
+        reply = post_process_reply(reply)
+    except LLMError as e:
+        await interaction.followup.send(f"se rompió algo: {e}")
+        return
+
+    for chunk in chunk_message(reply):
+        await interaction.followup.send(chunk)
+
+
+@bot.tree.command(name="chatmode", description="Activa o desactiva las respuestas automáticas del bot al mencionarlo.")
+@app_commands.describe(
+    estado="Activar o desactivar",
+    canal="Canal específico para auto-reply (opcional, por defecto todos)"
+)
+@app_commands.choices(estado=[
+    app_commands.Choice(name="Activar", value="on"),
+    app_commands.Choice(name="Desactivar", value="off"),
+])
+async def chatmode_slash(interaction: discord.Interaction, estado: app_commands.Choice[str], canal: discord.TextChannel | None = None):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not interaction.user.guild_permissions.manage_guild:
+        await interaction.response.send_message("❌ Necesitas el permiso `Gestionar servidor`.", ephemeral=True)
+        return
+
+    enabled = estado.value == "on"
+    channel_id = canal.id if canal else None
+    await set_chat_mode(interaction.guild.id, enabled, channel_id)
+
+    if enabled:
+        if canal:
+            msg = f"✅ Auto-reply activado solo en {canal.mention}."
+        else:
+            msg = "✅ Auto-reply activado en todos los canales."
+    else:
+        msg = "❌ Auto-reply desactivado."
+
+    await interaction.response.send_message(msg)
+
+
+@bot.tree.command(name="persona_view", description="Muestra la personalidad activa del bot en este servidor.")
+async def persona_view_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+
+    p = await get_persona(interaction.guild.id)
+    pid = p.get("profile_id", "default")
+    name = p.get("name") or "(sin nombre)"
+    lore = p.get("lore") or "(sin lore)"
+    personality = p.get("personality") or "(sin personalidad)"
+    accent = p.get("accent") or "(sin acento)"
+    catchphrases = p.get("catchphrases") or "(sin frases)"
+    greeting = p.get("greeting") or "(sin saludo)"
+
+    embed = discord.Embed(title=f"🤖 Persona activa: {name}", color=0x5865F2)
+    embed.add_field(name="ID del perfil", value=pid, inline=True)
+    embed.add_field(name="Nombre", value=name, inline=True)
+    embed.add_field(name="Lore", value=lore[:1024], inline=False)
+    embed.add_field(name="Personalidad", value=personality[:1024], inline=False)
+    embed.add_field(name="Acento", value=accent[:1024], inline=False)
+    embed.add_field(name="Frases típicas", value=catchphrases[:1024], inline=False)
+    embed.add_field(name="Saludo", value=greeting[:1024], inline=True)
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 if __name__ == "__main__":
