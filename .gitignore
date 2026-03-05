@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Env files
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+*.out
+*.err
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Python bytecode
+*.pyo
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# MyPy
+.mypy_cache/
+
+# Pytest
+.pytest_cache/

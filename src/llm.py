@@ -1,0 +1,141 @@
+import os
+import logging
+from typing import Any
+import google.generativeai as genai
+from google.api_core import exceptions as google_exceptions
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+)
+
+class LLMError(RuntimeError):
+    pass
+
+class LLMClient:
+    def __init__(self, api_key: str | None = None, model: str | None = None):
+        # 1. Carga de API Key
+        self.api_key = (api_key or os.getenv("GOOGLE_API_KEY") or "").strip()
+        if not self.api_key:
+            raise LLMError("Falta GOOGLE_API_KEY en .env")
+
+        # 2. Configuración
+        genai.configure(api_key=self.api_key)  # Configuración corregida (sin transport="rest")
+        self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-1.5-flash-latest")
+
+        raw_fallback = os.getenv("GEMINI_FALLBACK_MODELS", "gemini-1.5-flash,gemini-2.0-flash")
+        self.fallback_models = [m.strip() for m in raw_fallback.split(",") if m.strip()]
+        self.timeout = float(os.getenv("GEMINI_TIMEOUT", "45"))
+
+        # Pre-calculamos la lista de intentos una sola vez
+        self.intentos = [self.model_name]
+        for m in self.fallback_models:
+            if m != self.model_name and m not in self.intentos:
+                self.intentos.append(m)
+
+    def _build_history(self, messages: list[dict[str, str]]) -> tuple[str | None, list[dict[str, Any]]]:
+        system_parts: list[str] = []
+        chat_history: list[dict[str, Any]] = []
+
+        for msg in messages:
+            role = (msg.get("role") or "user").strip().lower()
+            content = msg.get("content")
+            if not content:
+                continue
+            text = str(content).strip()
+            if not text:
+                continue
+
+            if role == "system":
+                system_parts.append(text)
+            elif role in ("assistant", "model"):
+                chat_history.append({"role": "model", "parts": [text]})
+            else:
+                chat_history.append({"role": "user", "parts": [text]})
+
+        if not chat_history:
+            raise LLMError("No se envió ningún mensaje de usuario válido.")
+
+        system_instruction = "\n\n".join(system_parts) if system_parts else None
+        return system_instruction, chat_history
+
+    # AHORA ES UNA FUNCIÓN ASÍNCRONA
+    async def chat(self, messages: list[dict[str, str]], temperature: float = 0.65, max_tokens: int = 900) -> str:
+        if not messages:
+            raise LLMError("No se recibieron mensajes para el modelo.")
+
+        system_instruction, chat_history = self._build_history(messages)
+
+        last_error = None
+
+        # Usamos self.intentos en lugar de recalcularlo
+        for model_name in self.intentos:
+            try:
+                logging.info(f"Intentando modelo: {model_name}")
+                
+                # 1. Determinar si el modelo soporta system_instruction (familia Gemini)
+                is_gemini = "gemini" in model_name.lower()
+                
+                # 2. Preparar los argumentos base del modelo
+                model_kwargs = {
+                    "model_name": model_name,
+                    "generation_config": {
+                        "temperature": max(0.0, min(2.0, float(temperature))),
+                        "max_output_tokens": max(1, int(max_tokens)),
+                    }
+                }
+                
+                # 3. Clonar el historial para no modificar el original si hay reintentos (fallbacks)
+                current_history = [{"role": m["role"], "parts": list(m["parts"])} for m in chat_history]
+                
+                # 4. Manejar la instrucción del sistema de forma dinámica
+                if is_gemini:
+                    if system_instruction:
+                        model_kwargs["system_instruction"] = system_instruction
+                else:
+                    # Para Gemma u otros: inyectamos el contexto en el primer mensaje del usuario
+                    if system_instruction and current_history:
+                        for msg in current_history:
+                            if msg["role"] == "user":
+                                # Prependemos el prompt del sistema al mensaje del usuario
+                                msg["parts"][0] = f"[Contexto del Sistema]\n{system_instruction}\n\n[Mensaje del Usuario]\n{msg['parts'][0]}"
+                                break
+
+                # 5. Instanciar el modelo desempaquetando los argumentos
+                model = genai.GenerativeModel(**model_kwargs)
+
+                response = await model.generate_content_async(
+                    current_history,  # Pasamos el historial adaptado
+                    request_options={"timeout": self.timeout},
+                )
+
+                try:
+                    text_value = (response.text or "").strip()
+                except ValueError as ve:
+                    last_error = f"ValueError en {model_name}: {ve}"
+                    logging.warning(last_error)
+                    continue
+
+                if text_value:
+                    if model_name != self.intentos[0]:
+                        logging.warning(f"Fallback activado: modelo {model_name} usado en vez de {self.intentos[0]}")
+                    return text_value
+
+                last_error = f"Respuesta vacía en {model_name}"
+                logging.warning(last_error)
+                continue
+
+            except google_exceptions.ResourceExhausted:
+                last_error = f"Cuota agotada en {model_name}"
+                logging.warning(last_error)
+                continue
+            except google_exceptions.InvalidArgument as e:
+                last_error = f"Modelo {model_name} no encontrado o inválido: {e}"
+                logging.warning(last_error)
+                continue
+            except Exception as e:
+                last_error = f"Error en {model_name}: {e}"
+                logging.error(last_error)
+                continue
+
+        logging.error(f"No se pudo generar respuesta. Último error: {last_error}")
+        raise LLMError(f"No se pudo generar respuesta. Último error: {last_error}")
