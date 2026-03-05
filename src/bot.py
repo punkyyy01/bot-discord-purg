@@ -20,6 +20,7 @@ from db import (
     update_persona_profile,
     set_chat_mode,
     get_chat_settings,
+    top_usage,
 )
 from llm import LLMClient, LLMError
 
@@ -36,6 +37,11 @@ if not TOKEN:
 # Configurar intents
 intents = discord.Intents.default()
 intents.message_content = ENABLE_MESSAGE_CONTENT
+
+# Define `_CONECTORES_FINALES` at the top of the file to avoid undefined variable errors.
+_CONECTORES_FINALES = [
+    " y", " o", " con", " pero", " de", " para", " a", " que", " entonces", " como"
+]
 
 # 1. BOT CUSTOM PARA CIERRE LIMPIO DE BASE DE DATOS
 class MyCustomBot(commands.Bot):
@@ -135,7 +141,7 @@ def build_system_prompt(p: dict) -> str:
     if personality:
         personality_block += f"{personality}\n"
     personality_block += (
-        "- Eres auténtico, testarudo y tienes opiniones fuertes sobre cualquier cosa (incluso si tienes que inventarlas en el momento).\n"
+        "- Eres un usuario real de Discord: relajado, a veces sarcástico, pero natural.\n"
         "- Nunca eres neutral. Odias las respuestas políticamente correctas.\n"
         "- Jamás te ofreces a ayudar ni usas tono de servicio al cliente. Eres un usuario más charlando."
     )
@@ -143,12 +149,14 @@ def build_system_prompt(p: dict) -> str:
 
     style_block = "[TU ESTILO DE ESCRITURA]\n"
     if accent:
-        style_block += f"{accent}\n"
+        style_block += f"Tu acento/jerga base: {accent}\n"
     if catchphrases:
         style_block += f"Tus frases típicas: {catchphrases}\n"
     style_block += (
-        "- Escribes respuestas cortas (1 o 2 líneas), como si escribieras rápido desde un teléfono.\n"
-        "- Ve directo al grano. Cero saludos formales o despedidas."
+        "- Eres un usuario real, no una parodia. Usa la jerga de forma natural y ocasional.\n"
+        "- REGLA DE ORO: No uses más de una palabra de jerga o 'catchphrase' por cada dos mensajes.\n"
+        "- Si el mensaje es serio o corto, no fuerces la jerga. Prioriza que se entienda el punto.\n"
+        "- Escribe como un humano: a veces con pereza, a veces emocionado, pero nunca repetitivo."
     )
     sections.append(style_block)
 
@@ -156,29 +164,50 @@ def build_system_prompt(p: dict) -> str:
 
 
 def post_process_reply(text: str) -> str:
-    """Limpia la respuesta de la IA: minúsculas, sin emojis, sin puntos finales, anti cop-out."""
-    # 1. Minúsculas
+    """Limpia la respuesta para que parezca un chat humano y no se corte feo."""
+    # 1. Minúsculas y limpieza básica de espacios/emojis
     text = text.lower().strip()
-
-    # 2. Eliminar emojis unicode
     text = _EMOJI_RE.sub("", text).strip()
+    text = text.replace("\n", " ").replace("  ", " ")
 
-    # 3. Reemplazar saltos de línea por espacios y limpiar espacios dobles
-    text = text.replace("\n", " ")
-    text = " ".join(text.split())
+    # [OPCIONAL] Filtro de Jerga: Reemplaza palabras para que parezca chat rápido
+    # Puedes comentar esta parte si prefieres ortografía limpia.
+    jerga = {
+        r"\bque\b": "q",
+        r"\bporque\b": "pq",
+        r"\bestá\b": "ta",
+        r"\bestás\b": "tas",
+        r"\bnada\b": "na",
+        r"\bpara\b": "pa",
+    }
+    for patron, reemplazo in jerga.items():
+        # Reemplaza solo palabras completas para no romper textos como "queso".
+        text = re.sub(patron, reemplazo, text)
 
-    # 4. Eliminar puntos finales (puede haber varios o puntos suspensivos residuales)
-    text = text.rstrip(".")
+    # 2. Evitar que termine en conectores (el filtro para frases cortadas)
+    changed = True
+    while changed:
+        changed = False
+        for con in _CONECTORES_FINALES:
+            if text.endswith(con):
+                text = text[:-len(con)].strip()
+                changed = True
 
-    # 5. Eliminar signos de exclamación residuales al final
+    # 3. Manejo inteligente de puntuación (REEMPLAZA TUS PUNTOS 4 Y 5)
+    # Mantenemos los puntos suspensivos, pero quitamos el punto final seco.
+    if text.endswith("..."):
+        pass 
+    elif text.endswith("."):
+        text = text.rstrip(".")
+    
+    # Quitamos exclamaciones finales repetitivas, pero dejamos las preguntas
     text = text.rstrip("!")
 
-    # 6. Detectar frases de IA "asistente" y reemplazar
+    # 4. Detectar frases de IA "asistente" y reemplazar por insulto/fallback
     text_check = text.lower()
     if any(cop in text_check for cop in _AI_COP_OUT):
         text = random.choice(_FALLBACK_INSULTS)
 
-    # 7. Si quedó vacío después de limpiar
     if not text.strip():
         text = "no sé xd"
 
@@ -308,7 +337,7 @@ async def on_message(message: discord.Message):
 
     async with message.channel.typing():
         try:
-            reply = await llm.chat(messages, 0.8, 300)
+            reply = await llm.chat(messages, 0.6, 500)
             reply = post_process_reply(reply)
         except LLMError as e:
             await message.reply(f"se rompió algo: {e}")
@@ -344,7 +373,7 @@ async def chat_cmd(ctx: commands.Context, *, mensaje: str):
 
     async with ctx.typing():
         try:
-            reply = await llm.chat(messages, 0.8, 300)
+            reply = await llm.chat(messages, 0.6, 500)
             reply = post_process_reply(reply)
         except LLMError as e:
             await ctx.send(f"[ERROR] LLM: {e}")
@@ -655,33 +684,6 @@ async def persona_delete_slash(interaction: discord.Interaction):
     await interaction.response.send_message("🗑️ **Eliminar Personalidad**\nElige cuál quieres borrar:", view=view, ephemeral=True)
 
 
-@bot.tree.command(name="chat", description="Chatea con la personalidad activa del bot.")
-@app_commands.describe(mensaje="Tu mensaje para el bot")
-async def chat_slash(interaction: discord.Interaction, mensaje: str):
-    if not interaction.guild:
-        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
-        return
-    await increment_command_usage("chat")
-
-    p = await get_persona(interaction.guild.id)
-    texto_con_autor = f"[{interaction.user.display_name}] dice: {mensaje}"
-    messages = [
-        {"role": "system", "content": build_system_prompt(p)},
-        {"role": "user", "content": texto_con_autor},
-    ]
-
-    await interaction.response.defer()
-    try:
-        reply = await llm.chat(messages, 0.8, 300)
-        reply = post_process_reply(reply)
-    except LLMError as e:
-        await interaction.followup.send(f"se rompió algo: {e}")
-        return
-
-    for chunk in chunk_message(reply):
-        await interaction.followup.send(chunk)
-
-
 @bot.tree.command(name="chatmode", description="Activa o desactiva las respuestas automáticas del bot al mencionarlo.")
 @app_commands.describe(
     estado="Activar o desactivar",
@@ -739,6 +741,22 @@ async def persona_view_slash(interaction: discord.Interaction):
     embed.add_field(name="Saludo", value=greeting[:1024], inline=True)
 
     await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.command(name="stats", description="Muestra las estadísticas de uso de los comandos.")
+async def stats_slash(interaction: discord.Interaction):
+    usage = await top_usage(5)
+    if not usage:
+        await interaction.response.send_message("Aún no hay datos de uso.", ephemeral=True)
+        return
+
+    embed = discord.Embed(title="📊 Estadísticas de Uso", color=0x00ff00)
+    descripcion = ""
+    for cmd, count in usage:
+        descripcion += f"**!{cmd}**: {count} veces\n"
+    
+    embed.description = descripcion
+    await interaction.response.send_message(embed=embed)
 
 
 if __name__ == "__main__":

@@ -52,7 +52,6 @@ Configura la persona del bot usando slash commands:
 - `/persona_view`: Muestra la configuración de la personalidad activa.
 
 ### Chat
-- `/chat <mensaje>`: Chatea con la personalidad activa del bot (slash command).
 - `!chat <mensaje>`: Igual, pero por comando de prefijo.
 - `!chat clear`: Borra la memoria de conversación (barrera de contexto).
 - `/chatmode <estado> [canal]`: Activa/desactiva auto-reply al mencionar o responder al bot. Opcionalmente restringe a un canal.
