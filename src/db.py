@@ -42,6 +42,12 @@ CREATE TABLE IF NOT EXISTS persona_profiles (
     accent TEXT,
     catchphrases TEXT,
     greeting TEXT,
+    sarcasmo INTEGER NOT NULL DEFAULT 5,
+    empatia INTEGER NOT NULL DEFAULT 5,
+    hostilidad INTEGER NOT NULL DEFAULT 5,
+    humor INTEGER NOT NULL DEFAULT 5,
+    jerga INTEGER NOT NULL DEFAULT 5,
+    concision INTEGER NOT NULL DEFAULT 5,
     is_active INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (guild_id, profile_id)
 );
@@ -63,6 +69,7 @@ async def init_db():
     # Crear tablas
     await _db.executescript(SCHEMA)
     await _migrate_legacy_persona(_db)
+    await _migrate_add_param_columns(_db)
     await _db.commit()
 
 
@@ -72,6 +79,17 @@ async def close_db():
     if _db is not None:
         await _db.close()
         _db = None
+
+async def _migrate_add_param_columns(db: aiosqlite.Connection):
+    """Agrega columnas de parámetros numéricos si no existen (migración)."""
+    async with db.execute("PRAGMA table_info(persona_profiles)") as cur:
+        existing = {row[1] for row in await cur.fetchall()}
+    for col in ("sarcasmo", "empatia", "hostilidad", "humor", "jerga", "concision"):
+        if col not in existing:
+            await db.execute(
+                f"ALTER TABLE persona_profiles ADD COLUMN {col} INTEGER NOT NULL DEFAULT 5"
+            )
+
 
 async def _migrate_legacy_persona(db: aiosqlite.Connection):
     async with db.execute(
@@ -148,7 +166,8 @@ async def get_persona(guild_id: int):
     await _ensure_default_committed(guild_id)
     db = await get_db()
     async with db.execute(
-        "SELECT profile_id, name, lore, personality, accent, catchphrases, greeting "
+        "SELECT profile_id, name, lore, personality, accent, catchphrases, greeting, "
+        "sarcasmo, empatia, hostilidad, humor, jerga, concision "
         "FROM persona_profiles WHERE guild_id=? ORDER BY is_active DESC, profile_id ASC LIMIT 1",
         (guild_id,),
     ) as cursor:
@@ -162,6 +181,12 @@ async def get_persona(guild_id: int):
                 "accent": None,
                 "catchphrases": None,
                 "greeting": None,
+                "sarcasmo": 5,
+                "empatia": 5,
+                "hostilidad": 5,
+                "humor": 5,
+                "jerga": 5,
+                "concision": 5,
             }
         return {
             "profile_id": row[0],
@@ -171,6 +196,12 @@ async def get_persona(guild_id: int):
             "accent": row[4],
             "catchphrases": row[5],
             "greeting": row[6],
+            "sarcasmo": row[7],
+            "empatia": row[8],
+            "hostilidad": row[9],
+            "humor": row[10],
+            "jerga": row[11],
+            "concision": row[12],
         }
 
 async def list_persona_profiles(guild_id: int):
@@ -195,12 +226,17 @@ async def create_persona_profile(
         await _ensure_default_profile(db, guild_id)
         try:
             await db.execute(
-                "INSERT INTO persona_profiles (guild_id, profile_id, name, lore, personality, accent, catchphrases, greeting, is_active) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)",
+                "INSERT INTO persona_profiles "
+                "(guild_id, profile_id, name, lore, personality, accent, catchphrases, greeting, "
+                "sarcasmo, empatia, hostilidad, humor, jerga, concision, is_active) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
                 (
                     guild_id, profile_id,
                     f.get("name"), f.get("lore"), f.get("personality"),
                     f.get("accent"), f.get("catchphrases"), f.get("greeting"),
+                    f.get("sarcasmo", 5), f.get("empatia", 5),
+                    f.get("hostilidad", 5), f.get("humor", 5), f.get("jerga", 5),
+                    f.get("concision", 5),
                 ),
             )
             if activate:
@@ -318,7 +354,8 @@ async def set_persona_field(guild_id: int, field: str, value: str | None):
 async def get_persona_profile(guild_id: int, profile_id: str):
     db = await get_db()
     async with db.execute(
-        "SELECT profile_id, name, lore, personality, accent, catchphrases, greeting "
+        "SELECT profile_id, name, lore, personality, accent, catchphrases, greeting, "
+        "sarcasmo, empatia, hostilidad, humor, jerga, concision "
         "FROM persona_profiles WHERE guild_id=? AND profile_id=?",
         (guild_id, profile_id),
     ) as cursor:
@@ -333,10 +370,17 @@ async def get_persona_profile(guild_id: int, profile_id: str):
             "accent": row[4],
             "catchphrases": row[5],
             "greeting": row[6],
+            "sarcasmo": row[7],
+            "empatia": row[8],
+            "hostilidad": row[9],
+            "humor": row[10],
+            "jerga": row[11],
+            "concision": row[12],
         }
 
 async def update_persona_profile(guild_id: int, profile_id: str, fields: dict):
-    valid = {"name", "lore", "personality", "accent", "catchphrases", "greeting"}
+    valid = {"name", "lore", "personality", "accent", "catchphrases", "greeting",
+             "sarcasmo", "empatia", "hostilidad", "humor", "jerga", "concision"}
     to_update = {k: v for k, v in fields.items() if k in valid}
     if not to_update:
         return

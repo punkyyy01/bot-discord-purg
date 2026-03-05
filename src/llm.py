@@ -1,4 +1,6 @@
 import os
+import re
+import json
 import logging
 from typing import Any
 import google.generativeai as genai
@@ -32,34 +34,44 @@ class LLMClient:
             if m != self.model_name and m not in self.intentos:
                 self.intentos.append(m)
 
-    def _build_history(self, messages: list[dict[str, str]]) -> tuple[str | None, list[dict[str, Any]]]:
+    def _build_history(self, messages: list[dict[str, Any]]) -> tuple[str | None, list[dict[str, Any]]]:
         system_parts: list[str] = []
         chat_history: list[dict[str, Any]] = []
 
         for msg in messages:
             role = (msg.get("role") or "user").strip().lower()
             content = msg.get("content")
-            if not content:
-                continue
-            text = str(content).strip()
-            if not text:
+            images = msg.get("images") or []  # <--- NUEVO: Extraemos las imágenes
+
+            # Preparar las partes del mensaje (texto + imágenes)
+            parts = []
+            if content:
+                parts.append(str(content).strip())
+
+            # Agregamos las imágenes a las partes del mensaje
+            for img in images:
+                parts.append(img)
+
+            # Si no hay texto ni imágenes, saltamos
+            if not parts:
                 continue
 
             if role == "system":
-                system_parts.append(text)
+                # System prompt normalmente solo lleva texto
+                if content:
+                    system_parts.append(str(content).strip())
             elif role in ("assistant", "model"):
-                chat_history.append({"role": "model", "parts": [text]})
+                chat_history.append({"role": "model", "parts": parts})
             else:
-                chat_history.append({"role": "user", "parts": [text]})
+                chat_history.append({"role": "user", "parts": parts})
 
-        if not chat_history:
-            raise LLMError("No se envió ningún mensaje de usuario válido.")
-
+        # Quitamos la validación estricta de "Si no hay chat_history" porque 
+        # a veces el primer mensaje puede ser solo una foto.
         system_instruction = "\n\n".join(system_parts) if system_parts else None
         return system_instruction, chat_history
 
     # AHORA ES UNA FUNCIÓN ASÍNCRONA
-    async def chat(self, messages: list[dict[str, str]], temperature: float = 0.65, max_tokens: int = 900) -> str:
+    async def chat(self, messages: list[dict[str, Any]], temperature: float = 0.65, max_tokens: int = 900) -> str:
         if not messages:
             raise LLMError("No se recibieron mensajes para el modelo.")
 
@@ -139,3 +151,96 @@ class LLMClient:
 
         logging.error(f"No se pudo generar respuesta. Último error: {last_error}")
         raise LLMError(f"No se pudo generar respuesta. Último error: {last_error}")
+
+    _PARAM_DEFAULTS = {"sarcasmo": 5, "empatia": 5, "hostilidad": 5, "humor": 5, "jerga": 5, "concision": 5}
+
+    async def generar_parametros_persona(self, descripcion_texto: str) -> dict:
+        """Convierte texto en 6 parámetros numéricos (1-10) de forma robusta."""
+        logging.info(f"generar_parametros_persona llamado con texto de {len(descripcion_texto)} chars")
+        prompt = (
+            "Eres un clasificador de personalidades para un bot de Discord.\n"
+            "Analiza la descripción y califica CADA rasgo del 1 al 10.\n"
+            "USA EL RANGO COMPLETO. NO pongas todo en 5.\n\n"
+            f"DESCRIPCIÓN:\n{descripcion_texto}\n\n"
+            "RASGOS A EVALUAR:\n"
+            "- sarcasmo: 1=Siempre literal y sincero, 10=Ironía brutal constante\n"
+            "- empatia: 1=Frío e indiferente, 10=Extremadamente comprensivo\n"
+            "- hostilidad: 1=Pacífico y amable, 10=Insulta y ataca constantemente\n"
+            "- humor: 1=Serio y formal, 10=Todo es chiste\n"
+            "- jerga: 1=Formal y educado, 10=Puro slang callejero\n"
+            "- concision: 1=Mensajes muy largos, 10=Ultra breve y cortante\n\n"
+            "Responde SOLO con JSON. Ejemplo: {\"sarcasmo\":7,\"empatia\":2,\"hostilidad\":8,\"humor\":6,\"jerga\":9,\"concision\":8}"
+        )
+
+        # Intentar con cada modelo disponible (igual que chat)
+        last_error = None
+        for model_name in self.intentos:
+            # Intento 1: con response_mime_type (fuerza JSON)
+            # Intento 2: sin response_mime_type (por si el modelo no lo soporta)
+            configs = [
+                {"temperature": 0.1, "response_mime_type": "application/json"},
+                {"temperature": 0.1},
+            ]
+            for config in configs:
+                try:
+                    logging.info(f"Calibrando parámetros con modelo={model_name}, config={config}")
+                    model = genai.GenerativeModel(
+                        model_name=model_name,
+                        generation_config=config,
+                    )
+                    response = await model.generate_content_async(
+                        [{"role": "user", "parts": [prompt]}],
+                        request_options={"timeout": self.timeout},
+                    )
+                    raw = (response.text or "").strip()
+                    logging.info(f"Respuesta raw de calibración: {raw[:300]}")
+
+                    # Extraer JSON del texto (por si viene envuelto en markdown)
+                    json_match = re.search(r'\{[^{}]*\}', raw, re.DOTALL)
+                    if not json_match:
+                        last_error = f"No se encontró JSON en respuesta de {model_name}: {raw[:100]}"
+                        logging.warning(last_error)
+                        continue
+
+                    data = json.loads(json_match.group(0))
+                    data_clean = {str(k).lower().strip(): v for k, v in data.items()}
+
+                    result = {}
+                    all_default = True
+                    for key in self._PARAM_DEFAULTS:
+                        val = data_clean.get(key, 5)
+                        try:
+                            clamped = max(1, min(10, int(val)))
+                        except (ValueError, TypeError):
+                            clamped = 5
+                        result[key] = clamped
+                        if clamped != 5:
+                            all_default = False
+
+                    if all_default:
+                        logging.warning(f"Modelo {model_name} devolvió todo en 5, reintentando...")
+                        last_error = f"Todos los valores en 5 con {model_name}"
+                        continue
+
+                    logging.info(f"Parámetros calibrados exitosamente: {result}")
+                    return result
+
+                except json.JSONDecodeError as e:
+                    last_error = f"JSON inválido de {model_name}: {e}"
+                    logging.warning(last_error)
+                    continue
+                except google_exceptions.InvalidArgument as e:
+                    last_error = f"Argumento inválido en {model_name}: {e}"
+                    logging.warning(last_error)
+                    continue
+                except google_exceptions.ResourceExhausted:
+                    last_error = f"Cuota agotada en {model_name}"
+                    logging.warning(last_error)
+                    break  # Siguiente modelo
+                except Exception as e:
+                    last_error = f"Error calibrando con {model_name}: {e}"
+                    logging.error(last_error)
+                    continue
+
+        logging.error(f"Calibración falló en todos los modelos. Último error: {last_error}")
+        return dict(self._PARAM_DEFAULTS)

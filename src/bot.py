@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import random
+import aiohttp
 
 import discord
 from discord import app_commands
@@ -123,55 +124,92 @@ _FALLBACK_INSULTS = [
 ]
 
 
-def build_system_prompt(p: dict) -> str:
-    name = p.get("name") or "Usuario"
-    lore = p.get("lore") or ""
-    personality = p.get("personality") or ""
-    accent = p.get("accent") or ""
-    catchphrases = p.get("catchphrases") or ""
+def build_system_prompt(persona_data: dict) -> str:
+    name = persona_data.get("name") or "Usuario"
+    lore = persona_data.get("lore") or ""
+    personality = persona_data.get("personality") or ""
+    accent = persona_data.get("accent") or ""
+    catchphrases = persona_data.get("catchphrases") or ""
+
+    sarcasmo = persona_data.get("sarcasmo", 5)
+    empatia = persona_data.get("empatia", 5)
+    hostilidad = persona_data.get("hostilidad", 5)
+    humor = persona_data.get("humor", 5)
+    jerga = persona_data.get("jerga", 5)
+    concision = persona_data.get("concision", 5)
 
     sections = []
-    sections.append(f"Actúa EXCLUSIVAMENTE como '{name}' interactuando en un servidor de Discord con otros usuarios.")
-    sections.append("Esta es tu única realidad. Entra en personaje de inmediato y nunca rompas la cuarta pared.")
+    sections.append(f"$ Eres un motor de simulación. Tu nombre es {name}.")
 
     if lore:
-        sections.append(f"[TU LORE E HISTORIA]\n{lore}")
-
-    personality_block = "[TU PERSONALIDAD]\n"
+        sections.append(f"[LORE]\n{lore}")
     if personality:
-        personality_block += f"{personality}\n"
-    personality_block += (
-        "- Eres un usuario real de Discord: relajado, a veces sarcástico, pero natural.\n"
-        "- Nunca eres neutral. Odias las respuestas políticamente correctas.\n"
-        "- Jamás te ofreces a ayudar ni usas tono de servicio al cliente. Eres un usuario más charlando."
-    )
-    sections.append(personality_block)
-
-    style_block = "[TU ESTILO DE ESCRITURA]\n"
+        sections.append(f"[PERSONALIDAD BASE]\n{personality}")
     if accent:
-        style_block += f"Tu acento/jerga base: {accent}\n"
+        sections.append(f"[ACENTO/JERGA]\n{accent}")
     if catchphrases:
-        style_block += f"Tus frases típicas: {catchphrases}\n"
-    style_block += (
-        "- Eres un usuario real, no una parodia. Usa la jerga de forma natural y ocasional.\n"
-        "- REGLA DE ORO: No uses más de una palabra de jerga o 'catchphrase' por cada dos mensajes.\n"
-        "- Si el mensaje es serio o corto, no fuerces la jerga. Prioriza que se entienda el punto.\n"
-        "- Escribe como un humano: a veces con pereza, a veces emocionado, pero nunca repetitivo."
+        sections.append(f"[FRASES TÍPICAS]\n{catchphrases}")
+
+    sections.append(
+        f"$ [PARÁMETROS]: Sarcasmo {sarcasmo}/10, Empatía {empatia}/10, "
+        f"Hostilidad {hostilidad}/10, Humor {humor}/10, Jerga {jerga}/10, "
+        f"Concisión {concision}/10."
     )
-    sections.append(style_block)
+
+    sections.append(
+        "$ INSTRUCCIÓN DE PROCESAMIENTO OBLIGATORIA: Para CADA mensaje del usuario, "
+        "DEBES responder siguiendo estrictamente este formato XML:\n\n"
+        "<pensamiento>\n"
+        "En <pensamiento>, DEBES realizar un análisis profundo paso a paso: "
+        "1. Intención del usuario, 2. Contexto de la conversación, "
+        "3. Aplicación de tus parámetros, 4. Borrador de la respuesta. "
+        "Tómate todo el espacio que necesites para razonar.\n"
+        "</pensamiento>\n\n"
+        "<respuesta>\n"
+        f"Tu nivel de CONCISIÓN es {concision}/10. "
+    )
+
+    if concision >= 7:
+        sections[-1] += (
+            "Como tu concisión es alta (7-10), DEBES responder con frases cortas, "
+            "estilo chat rápido. Evita párrafos largos. Nunca des explicaciones innecesarias.\n"
+        )
+    else:
+        sections[-1] += (
+            "Ajusta la longitud de tu respuesta según este nivel de concisión.\n"
+        )
+
+    sections[-1] += (
+        "[Tu respuesta final en personaje, lista para Discord, sin comillas ni markdown innecesario.]\n"
+        "</respuesta>"
+    )
 
     return "\n\n".join(sections)
 
 
 def post_process_reply(text: str) -> str:
-    """Limpia la respuesta para que parezca un chat humano y no se corte feo."""
-    # 1. Minúsculas y limpieza básica de espacios/emojis
+    """Extrae la respuesta final eliminando CUALQUIER rastro del pensamiento."""
+    # 1. Eliminar de forma agresiva todo lo que esté entre etiquetas de pensamiento
+    text = re.sub(r"<pensamiento>.*?</pensamiento>", "", text, flags=re.DOTALL | re.IGNORECASE).strip()
+
+    # 2. Intentar extraer solo lo que esté en <respuesta>
+    match_respuesta = re.search(r"<respuesta>(.*?)</respuesta>", text, flags=re.DOTALL | re.IGNORECASE)
+    if match_respuesta:
+        text = match_respuesta.group(1).strip()
+
+    # 3. Limpieza final de etiquetas huérfanas (por si el LLM no cerró bien una)
+    text = re.sub(r"</?(?:pensamiento|respuesta)>", "", text, flags=re.IGNORECASE).strip()
+
+    if not text:
+        print("[ERROR CRÍTICO] El LLM no generó contenido útil. Texto raw suprimido.")
+        text = "me quedé en blanco, pregunta de nuevo"
+
+    # 4. Minúsculas y limpieza básica de espacios/emojis
     text = text.lower().strip()
     text = _EMOJI_RE.sub("", text).strip()
     text = text.replace("\n", " ").replace("  ", " ")
 
     # [OPCIONAL] Filtro de Jerga: Reemplaza palabras para que parezca chat rápido
-    # Puedes comentar esta parte si prefieres ortografía limpia.
     jerga = {
         r"\bque\b": "q",
         r"\bporque\b": "pq",
@@ -181,7 +219,6 @@ def post_process_reply(text: str) -> str:
         r"\bpara\b": "pa",
     }
     for patron, reemplazo in jerga.items():
-        # Reemplaza solo palabras completas para no romper textos como "queso".
         text = re.sub(patron, reemplazo, text)
 
     # 2. Evitar que termine en conectores (el filtro para frases cortadas)
@@ -193,14 +230,11 @@ def post_process_reply(text: str) -> str:
                 text = text[:-len(con)].strip()
                 changed = True
 
-    # 3. Manejo inteligente de puntuación (REEMPLAZA TUS PUNTOS 4 Y 5)
-    # Mantenemos los puntos suspensivos, pero quitamos el punto final seco.
+    # 3. Manejo inteligente de puntuación
     if text.endswith("..."):
         pass 
     elif text.endswith("."):
         text = text.rstrip(".")
-    
-    # Quitamos exclamaciones finales repetitivas, pero dejamos las preguntas
     text = text.rstrip("!")
 
     # 4. Detectar frases de IA "asistente" y reemplazar por insulto/fallback
@@ -219,31 +253,79 @@ def sanitize_message_for_chat(content: str, bot_user_id: int | None) -> str:
         text = text.replace(f"<@{bot_user_id}>", "").replace(f"<@!{bot_user_id}>", "")
     return text.strip()
 
+async def download_image_url(url: str) -> dict | None:
+    """Descarga una imagen desde cualquier URL y la formatea para Gemini."""
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    content_type = resp.headers.get('Content-Type', '')
+                    if content_type.startswith('image/'):
+                        data = await resp.read()
+                        return {"mime_type": content_type, "data": data}
+        except Exception as e:
+            print(f"[ERROR] No se pudo descargar imagen {url}: {e}")
+    return None
+
+async def get_all_images_from_message(msg: discord.Message) -> list[dict]:
+    """Extrae imágenes tanto de adjuntos directos como de Embeds."""
+    images = []
+    # 1. Archivos adjuntos directos
+    for att in msg.attachments:
+        if att.content_type and att.content_type.startswith("image/"):
+            img_dict = await download_image_url(att.url)
+            if img_dict:
+                images.append(img_dict)
+    
+    # 2. Imágenes dentro de Embeds (Links, bots, Twitter, Tenor, etc.)
+    for embed in msg.embeds:
+        url = None
+        if embed.image and embed.image.url:
+            url = embed.image.url
+        elif embed.thumbnail and embed.thumbnail.url:
+            url = embed.thumbnail.url
+            
+        if url:
+            img_dict = await download_image_url(url)
+            if img_dict:
+                images.append(img_dict)
+                
+    return images
+
 async def build_recent_context(message: discord.Message, limit: int = 10) -> list[dict]:
     history_rows: list[dict] = []
     bot_user_id = bot.user.id if bot.user else None
 
     async for row in message.channel.history(limit=50, before=message, oldest_first=False):
         text = (row.content or "").strip()
-        
-        # BARRERA DE MEMORIA: Detiene la lectura si encuentra un comando de limpieza
+
         if text.startswith("!chat clear") or text.startswith("🧹"):
             break
 
-        if not text or text.startswith("!"):
+        if not text and not row.attachments: # <-- Modificado para no ignorar mensajes con solo fotos
+            continue
+        if text.startswith("!"):
             continue
         if row.author.bot and (not bot_user_id or row.author.id != bot.user.id):
             continue
 
         role = "assistant" if (bot_user_id and row.author.id == bot.user.id) else "user"
         clean_text = sanitize_message_for_chat(text, bot_user_id)
-        if not clean_text:
+
+        if not clean_text and not row.attachments:
             continue
 
-        if role == "user":
+        if role == "user" and clean_text:
             clean_text = f"[{row.author.display_name}] dijo: {clean_text}"
 
-        history_rows.append({"role": role, "content": clean_text})
+        images = await get_all_images_from_message(row)
+
+        # Modificamos la condición para saltar mensajes vacíos
+        if not clean_text and not images:
+            continue
+
+        history_rows.append({"role": role, "content": clean_text, "images": images})
+
         if len(history_rows) >= limit:
             break
 
@@ -291,10 +373,13 @@ async def on_command_error(ctx: commands.Context, error: Exception):
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
+        
+    # 1. Procesar comandos básicos (!ping, !chat)
     await bot.process_commands(message)
     if (message.content or "").strip().startswith("!"):
         return
 
+    # 2. Verificar si el bot fue mencionado o si le respondieron a él directamente
     mention_bot = bool(bot.user and bot.user.id in (message.raw_mentions or []))
     reply_to_bot = False
     if message.reference and message.reference.message_id and bot.user:
@@ -308,38 +393,43 @@ async def on_message(message: discord.Message):
     if not message.guild:
         return
         
+    # 3. Respetar restricciones de canal y modo de chat
     settings = await get_chat_settings(message.guild.id)
     if not settings["enabled"]:
         return
-    # Respetar restricción de canal si está configurada
     if settings["channel_id"] and message.channel.id != settings["channel_id"]:
         return
 
-    p = await get_persona(message.guild.id)
+    # 4. Limpiar texto de menciones y comandos de memoria
     current_text = sanitize_message_for_chat(message.content or "", bot.user.id if bot.user else None)
-    if not current_text:
-        return
-
-    # Detección de "borra cache" / "borra caché" / "clear cache" etc.
+    
     _lower = current_text.lower()
     if any(kw in _lower for kw in ("borra cache", "borra caché", "clear cache", "borra memoria", "reset memoria")):
         await message.reply("🧹 ¡Listo! Memoria borrada. Empecemos de cero.")
         return
 
-    texto_con_autor = f"[{message.author.display_name}] dice: {current_text}"
+    # Preparar el texto y las imágenes del mensaje actual
+    current_images = await get_all_images_from_message(message)
 
+    # Magia nueva: Si estás respondiendo a otro mensaje, ¡extrae la imagen de ahí también!
+    if message.reference and message.reference.resolved and isinstance(message.reference.resolved, discord.Message):
+        ref_images = await get_all_images_from_message(message.reference.resolved)
+        current_images.extend(ref_images)
+
+    p = await get_persona(message.guild.id)
     context_history = await build_recent_context(message, limit=10)
+
     messages = [
         {"role": "system", "content": build_system_prompt(p)},
         *context_history,
-        {"role": "user", "content": texto_con_autor},
+        {"role": "user", "content": current_text, "images": current_images},
     ]
 
     async with message.channel.typing():
         try:
-            reply = await llm.chat(messages, 0.6, 500)
-            reply = post_process_reply(reply)
-        except LLMError as e:
+            reply = await llm.chat(messages, 0.6, 1000)
+            reply = post_process_reply(reply) # Limpiamos la respuesta (emojis, etc)
+        except Exception as e:
             await message.reply(f"se rompió algo: {e}")
             return
 
@@ -373,7 +463,7 @@ async def chat_cmd(ctx: commands.Context, *, mensaje: str):
 
     async with ctx.typing():
         try:
-            reply = await llm.chat(messages, 0.6, 500)
+            reply = await llm.chat(messages, 0.6, 1000)
             reply = post_process_reply(reply)
         except LLMError as e:
             await ctx.send(f"[ERROR] LLM: {e}")
@@ -404,20 +494,26 @@ class PersonaCreateModal(discord.ui.Modal, title="Crear nueva Persona"):
         self.lore = discord.ui.TextInput(
             label="Lore",
             style=discord.TextStyle.paragraph,
-            placeholder="Describe el trasfondo del personaje",
-            required=False,
+            placeholder="Describe el trasfondo del personaje (mín. 20 caracteres)",
+            required=True,
+            min_length=20,
+            max_length=1000,
         )
         self.personalidad = discord.ui.TextInput(
             label="Personalidad",
             style=discord.TextStyle.paragraph,
-            placeholder="Describe cómo es el personaje",
-            required=False,
+            placeholder="Describe cómo es el personaje (mín. 20 caracteres)",
+            required=True,
+            min_length=20,
+            max_length=1000,
         )
         self.frases_tipicas = discord.ui.TextInput(
-            label="Frases típicas o Acento",
+            label="Acento & Frases típicas",
             style=discord.TextStyle.paragraph,
-            placeholder="Ej: Habla con acento chileno. Usa 'po' seguido.",
-            required=False,
+            placeholder="Ej: Habla con acento chileno, dice 'po' y 'weón'. Es agresivo e insultante.",
+            required=True,
+            min_length=20,
+            max_length=1000,
         )
 
         self.add_item(self.profile_id)
@@ -430,12 +526,23 @@ class PersonaCreateModal(discord.ui.Modal, title="Crear nueva Persona"):
         guild_id = interaction.guild.id
         profile_id = self.profile_id.value.strip().lower().replace(" ", "_")
 
+        # Concatenar texto descriptivo para generar parámetros numéricos
+        texto_completo = " ".join(filter(None, [
+            self.lore.value,
+            self.personalidad.value,
+            self.frases_tipicas.value,
+        ]))
+        if not texto_completo.strip() or len(texto_completo.strip()) < 10:
+            texto_completo = "Este personaje es un usuario promedio de Discord, relajado e informal, pero educado y neutral"
+        params = await llm.generar_parametros_persona(texto_completo)
+
         fields = {
             "name": self.nombre.value or None,
             "lore": self.lore.value or None,
             "personality": self.personalidad.value or None,
             "accent": self.frases_tipicas.value or None,
             "catchphrases": self.frases_tipicas.value or None,
+            **params,
         }
 
         created = await create_persona_profile(guild_id, profile_id, fields=fields, activate=True)
@@ -443,7 +550,12 @@ class PersonaCreateModal(discord.ui.Modal, title="Crear nueva Persona"):
             await interaction.response.send_message(f"⚠️ Ya existe una personalidad con ID `{profile_id}`.", ephemeral=True)
             return
 
-        await interaction.response.send_message(f"✅ Perfil **{self.nombre.value}** (`{profile_id}`) creado y activado con éxito.", ephemeral=True)
+        p_str = ", ".join(f"{k}={params.get(k, 5)}" for k in ("sarcasmo", "empatia", "hostilidad", "humor", "jerga", "concision"))
+        await interaction.response.send_message(
+            f"✅ Perfil **{self.nombre.value}** (`{profile_id}`) creado y activado.\n"
+            f"📊 Parámetros generados: {p_str}",
+            ephemeral=True,
+        )
 
 
 class PersonaSelect(discord.ui.Select):
@@ -491,29 +603,37 @@ class PersonaEditModal(discord.ui.Modal, title="Editar Persona"):
         self.lore = discord.ui.TextInput(
             label="Lore",
             style=discord.TextStyle.paragraph,
-            placeholder="Describe el trasfondo del personaje",
-            required=False,
+            placeholder="Describe el trasfondo del personaje (mín. 20 caracteres)",
+            required=True,
+            min_length=20,
+            max_length=1000,
             default=current.get("lore") or "",
         )
         self.personalidad = discord.ui.TextInput(
             label="Personalidad",
             style=discord.TextStyle.paragraph,
-            placeholder="Describe cómo es el personaje",
-            required=False,
+            placeholder="Describe cómo es el personaje (mín. 20 caracteres)",
+            required=True,
+            min_length=20,
+            max_length=1000,
             default=current.get("personality") or "",
         )
         self.acento = discord.ui.TextInput(
             label="Acento",
             style=discord.TextStyle.paragraph,
-            placeholder="Ej: Habla con acento chileno",
-            required=False,
+            placeholder="Ej: Habla con acento chileno (mín. 20 caracteres)",
+            required=True,
+            min_length=20,
+            max_length=1000,
             default=current.get("accent") or "",
         )
         self.frases_tipicas = discord.ui.TextInput(
             label="Frases típicas",
             style=discord.TextStyle.paragraph,
-            placeholder="Ej: Usa 'po' seguido.",
-            required=False,
+            placeholder="Ej: Usa 'po' seguido. (mín. 20 caracteres)",
+            required=True,
+            min_length=20,
+            max_length=1000,
             default=current.get("catchphrases") or "",
         )
 
@@ -524,17 +644,32 @@ class PersonaEditModal(discord.ui.Modal, title="Editar Persona"):
         self.add_item(self.frases_tipicas)
 
     async def on_submit(self, interaction: discord.Interaction):
+        # Concatenar texto descriptivo para regenerar parámetros numéricos
+        texto_completo = " ".join(filter(None, [
+            self.lore.value,
+            self.personalidad.value,
+            self.acento.value,
+            self.frases_tipicas.value,
+        ]))
+        if not texto_completo.strip() or len(texto_completo.strip()) < 10:
+            texto_completo = "Este personaje es un usuario promedio de Discord, relajado e informal, pero educado y neutral"
+        params = await llm.generar_parametros_persona(texto_completo)
+
         fields = {
             "name": self.nombre.value or None,
             "lore": self.lore.value or None,
             "personality": self.personalidad.value or None,
             "accent": self.acento.value or None,
             "catchphrases": self.frases_tipicas.value or None,
+            **params,
         }
         await update_persona_profile(self._guild_id, self._profile_id, fields)
         display_name = self.nombre.value or self._profile_id
+
+        p_str = ", ".join(f"{k}={params.get(k, 5)}" for k in ("sarcasmo", "empatia", "hostilidad", "humor", "jerga", "concision"))
         await interaction.response.send_message(
-            f"✅ Personalidad **{display_name}** (`{self._profile_id}`) actualizada con éxito.",
+            f"✅ Personalidad **{display_name}** (`{self._profile_id}`) actualizada.\n"
+            f"📊 Parámetros regenerados: {p_str}",
             ephemeral=True,
         )
 
@@ -739,6 +874,16 @@ async def persona_view_slash(interaction: discord.Interaction):
     embed.add_field(name="Acento", value=accent[:1024], inline=False)
     embed.add_field(name="Frases típicas", value=catchphrases[:1024], inline=False)
     embed.add_field(name="Saludo", value=greeting[:1024], inline=True)
+
+    params_str = (
+        f"Sarcasmo: {p.get('sarcasmo', 5)}/10 | "
+        f"Empatía: {p.get('empatia', 5)}/10 | "
+        f"Hostilidad: {p.get('hostilidad', 5)}/10 | "
+        f"Humor: {p.get('humor', 5)}/10 | "
+        f"Jerga: {p.get('jerga', 5)}/10 | "
+        f"Concisión: {p.get('concision', 5)}/10"
+    )
+    embed.add_field(name="📊 Parámetros", value=params_str, inline=False)
 
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
