@@ -44,6 +44,56 @@ _CONECTORES_FINALES = [
     " y", " o", " con", " pero", " de", " para", " a", " que", " entonces", " como"
 ]
 
+# Move the `build_system_prompt` function to the top of the file, before its first usage.
+
+def build_system_prompt(persona: dict) -> str:
+    """
+    Genera un system prompt dinámico integrando la historia, acento 
+    y los parámetros numéricos de actitud del personaje.
+    """
+    name = persona.get("name") or "Usuario"
+    lore = persona.get("lore") or ""
+    personality = persona.get("personality") or ""
+    accent = persona.get("accent") or ""
+    catchphrases = persona.get("catchphrases") or ""
+
+    sarcasmo = persona.get("sarcasmo", 5)
+    empatia = persona.get("empatia", 5)
+    hostilidad = persona.get("hostilidad", 5)
+    humor = persona.get("humor", 5)
+    jerga = persona.get("jerga", 5)
+    concision = persona.get("concision", 5)
+
+    sections = [
+        f"Adopta la siguiente personalidad y responde SIEMPRE como este personaje. Eres {name}."
+    ]
+
+    if lore: sections.append(f"[TU HISTORIA]\n{lore}")
+    if personality: sections.append(f"[TU PERSONALIDAD]\n{personality}")
+    if accent: sections.append(f"[TU FORMA DE HABLAR]\n{accent}")
+    if catchphrases: sections.append(f"[FRASES TÍPICAS]\n{catchphrases}")
+
+    sections.append(
+        f"[TUS PARÁMETROS DE ACTITUD (Escala 1 al 10)]\n"
+        f"- Sarcasmo: {sarcasmo}\n"
+        f"- Empatía: {empatia}\n"
+        f"- Hostilidad: {hostilidad}\n"
+        f"- Humor: {humor}\n"
+        f"- Jerga: {jerga}\n"
+        f"- Concisión (1=Textos largos, 10=Respuestas ultra cortas): {concision}"
+    )
+
+    sections.append(
+        "REGLAS ABSOLUTAS:\n"
+        "1. NUNCA rompas el personaje.\n"
+        "2. NUNCA digas que eres una IA, un asistente o un modelo de lenguaje.\n"
+        "3. Responde de forma natural, directa y como si estuvieras en un chat de Discord con amigos.\n"
+        "4. Si tu concisión es alta (7 o más), usa frases muy cortas. Evita párrafos largos.\n"
+        "5. NO uses comillas, ni expliques tu razonamiento. Escribe tu mensaje y ya."
+    )
+
+    return "\n\n".join(sections)
+
 # 1. BOT CUSTOM PARA CIERRE LIMPIO DE BASE DE DATOS
 class MyCustomBot(commands.Bot):
     async def close(self):
@@ -113,115 +163,24 @@ _AI_COP_OUT = [
     "no estoy en posición",
 ]
 
-_FALLBACK_INSULTS = [
-    "no sé xd",
-    "me da igual la verdad",
-    "pregúntale a tu mamá",
-    "ni idea bro",
-    "que pereza responder eso",
-    "paso de esa pregunta",
-    "eso es cosa tuya",
+_FALLBACK_DEFLECTIONS = [
+    "ni idea la verdad",
+    "ahora mismo no sé, dímelo tú",
+    "qué pereza pensar en eso ahora",
+    "eso no tiene sentido bro",
+    "paso de responder eso xd"
 ]
 
-
-def build_system_prompt(persona_data: dict) -> str:
-    name = persona_data.get("name") or "Usuario"
-    lore = persona_data.get("lore") or ""
-    personality = persona_data.get("personality") or ""
-    accent = persona_data.get("accent") or ""
-    catchphrases = persona_data.get("catchphrases") or ""
-
-    sarcasmo = persona_data.get("sarcasmo", 5)
-    empatia = persona_data.get("empatia", 5)
-    hostilidad = persona_data.get("hostilidad", 5)
-    humor = persona_data.get("humor", 5)
-    jerga = persona_data.get("jerga", 5)
-    concision = persona_data.get("concision", 5)
-
-    sections = []
-    sections.append(f"$ Eres un motor de simulación. Tu nombre es {name}.")
-
-    if lore:
-        sections.append(f"[LORE]\n{lore}")
-    if personality:
-        sections.append(f"[PERSONALIDAD BASE]\n{personality}")
-    if accent:
-        sections.append(f"[ACENTO/JERGA]\n{accent}")
-    if catchphrases:
-        sections.append(f"[FRASES TÍPICAS]\n{catchphrases}")
-
-    sections.append(
-        f"$ [PARÁMETROS]: Sarcasmo {sarcasmo}/10, Empatía {empatia}/10, "
-        f"Hostilidad {hostilidad}/10, Humor {humor}/10, Jerga {jerga}/10, "
-        f"Concisión {concision}/10."
-    )
-
-    sections.append(
-        "$ INSTRUCCIÓN DE PROCESAMIENTO OBLIGATORIA: Para CADA mensaje del usuario, "
-        "DEBES responder siguiendo estrictamente este formato XML:\n\n"
-        "<pensamiento>\n"
-        "En <pensamiento>, DEBES realizar un análisis profundo paso a paso: "
-        "1. Intención del usuario, 2. Contexto de la conversación, "
-        "3. Aplicación de tus parámetros, 4. Borrador de la respuesta. "
-        "Tómate todo el espacio que necesites para razonar.\n"
-        "</pensamiento>\n\n"
-        "<respuesta>\n"
-        f"Tu nivel de CONCISIÓN es {concision}/10. "
-    )
-
-    if concision >= 7:
-        sections[-1] += (
-            "Como tu concisión es alta (7-10), DEBES responder con frases cortas, "
-            "estilo chat rápido. Evita párrafos largos. Nunca des explicaciones innecesarias.\n"
-        )
-    else:
-        sections[-1] += (
-            "Ajusta la longitud de tu respuesta según este nivel de concisión.\n"
-        )
-
-    sections[-1] += (
-        "[Tu respuesta final en personaje, lista para Discord, sin comillas ni markdown innecesario.]\n"
-        "</respuesta>"
-    )
-
-    return "\n\n".join(sections)
-
-
 def post_process_reply(text: str) -> str:
-    """Extrae la respuesta final eliminando CUALQUIER rastro del pensamiento."""
-    # 1. Eliminar de forma agresiva todo lo que esté entre etiquetas de pensamiento
-    text = re.sub(r"<pensamiento>.*?</pensamiento>", "", text, flags=re.DOTALL | re.IGNORECASE).strip()
-
-    # 2. Intentar extraer solo lo que esté en <respuesta>
-    match_respuesta = re.search(r"<respuesta>(.*?)</respuesta>", text, flags=re.DOTALL | re.IGNORECASE)
-    if match_respuesta:
-        text = match_respuesta.group(1).strip()
-
-    # 3. Limpieza final de etiquetas huérfanas (por si el LLM no cerró bien una)
-    text = re.sub(r"</?(?:pensamiento|respuesta)>", "", text, flags=re.IGNORECASE).strip()
-
     if not text:
-        print("[ERROR CRÍTICO] El LLM no generó contenido útil. Texto raw suprimido.")
-        text = "me quedé en blanco, pregunta de nuevo"
+        return "me quedé en blanco, pregunta de nuevo"
 
-    # 4. Minúsculas y limpieza básica de espacios/emojis
+    # Limpieza básica
     text = text.lower().strip()
     text = _EMOJI_RE.sub("", text).strip()
     text = text.replace("\n", " ").replace("  ", " ")
 
-    # [OPCIONAL] Filtro de Jerga: Reemplaza palabras para que parezca chat rápido
-    jerga = {
-        r"\bque\b": "q",
-        r"\bporque\b": "pq",
-        r"\bestá\b": "ta",
-        r"\bestás\b": "tas",
-        r"\bnada\b": "na",
-        r"\bpara\b": "pa",
-    }
-    for patron, reemplazo in jerga.items():
-        text = re.sub(patron, reemplazo, text)
-
-    # 2. Evitar que termine en conectores (el filtro para frases cortadas)
+    # Filtro de conectores finales
     changed = True
     while changed:
         changed = False
@@ -230,17 +189,13 @@ def post_process_reply(text: str) -> str:
                 text = text[:-len(con)].strip()
                 changed = True
 
-    # 3. Manejo inteligente de puntuación
-    if text.endswith("..."):
-        pass 
-    elif text.endswith("."):
+    if text.endswith("."):
         text = text.rstrip(".")
-    text = text.rstrip("!")
 
-    # 4. Detectar frases de IA "asistente" y reemplazar por insulto/fallback
+    # Detectar frases de IA "asistente"
     text_check = text.lower()
     if any(cop in text_check for cop in _AI_COP_OUT):
-        text = random.choice(_FALLBACK_INSULTS)
+        text = random.choice(_FALLBACK_DEFLECTIONS)
 
     if not text.strip():
         text = "no sé xd"

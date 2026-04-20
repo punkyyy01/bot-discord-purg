@@ -196,7 +196,7 @@ class LLMClient:
                     logging.info(f"Respuesta raw de calibración: {raw[:300]}")
 
                     # Extraer JSON del texto (por si viene envuelto en markdown)
-                    json_match = re.search(r'\{[^{}]*\}', raw, re.DOTALL)
+                    json_match = re.search(r'\{.*\}', raw, re.DOTALL)
                     if not json_match:
                         last_error = f"No se encontró JSON en respuesta de {model_name}: {raw[:100]}"
                         logging.warning(last_error)
