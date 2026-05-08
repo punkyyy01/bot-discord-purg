@@ -334,10 +334,8 @@ async def on_message(message: discord.Message):
     if settings["channel_id"] and message.channel.id != settings["channel_id"]:
         return
 
-    async with message.channel.typing():
-        reply = await generate_markov_reply(message.guild.id)
-        reply = post_process_reply(reply) if reply else "..."
-
+    reply = await generate_markov_reply(message.guild.id)
+    reply = post_process_reply(reply) if reply else "..."
     for chunk in chunk_message(reply):
         await message.reply(chunk)
 
