@@ -194,7 +194,7 @@ async def build_markov_model(guild_id: int, channel_id: int) -> markovify.Text |
 
     text = "\n".join(corpus)
     try:
-        model = markovify.Text(text, state_size=2, well_formed=False)
+        model = markovify.Text(text, state_size=1, well_formed=False)
     except Exception:
         return None
 
