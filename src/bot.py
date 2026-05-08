@@ -2,6 +2,12 @@ import os
 import sys
 import re
 import random
+import asyncio
+import hashlib
+import urllib.request
+import aiohttp
+import boto3
+from botocore.config import Config
 import markovify
 
 import discord
@@ -46,6 +52,15 @@ _corpus_insert_counter: dict[tuple[int, int], int] = {}
 
 _GIF_RE = re.compile(r'https?://\S*(tenor\.com|giphy\.com|cdn\.discordapp\.com/attachments/\S*\.gif)\S*', re.IGNORECASE)
 _REFEED_MAX_MESSAGES = 20_000
+
+_r2_client = boto3.client(
+    "s3",
+    endpoint_url=os.getenv("R2_ENDPOINT_URL"),
+    aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+    config=Config(signature_version="s3v4"),
+    region_name="auto",
+)
 
 ALLOWED_ROLE_IDS = {1434103563746803801, 1434103563700666401}
 
@@ -211,6 +226,42 @@ async def generate_markov_reply(guild_id: int) -> str | None:
     return None
 
 
+def upload_gif_to_r2_sync(url: str, guild_id: int) -> str | None:
+    try:
+        with urllib.request.urlopen(url, timeout=15) as resp:
+            data = resp.read()
+        key = f"{guild_id}/{hashlib.md5(url.encode()).hexdigest()}.gif"
+        _r2_client.put_object(
+            Bucket=os.getenv("R2_BUCKET_NAME", ""),
+            Key=key,
+            Body=data,
+            ContentType="image/gif",
+        )
+        return f"{os.getenv('R2_PUBLIC_URL', '').rstrip('/')}/{key}"
+    except Exception:
+        return None
+
+
+async def upload_gif_to_r2(url: str, guild_id: int) -> str | None:
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                if resp.status != 200:
+                    return None
+                data = await resp.read()
+        key = f"{guild_id}/{hashlib.md5(url.encode()).hexdigest()}.gif"
+        await asyncio.to_thread(
+            _r2_client.put_object,
+            Bucket=os.getenv("R2_BUCKET_NAME", ""),
+            Key=key,
+            Body=data,
+            ContentType="image/gif",
+        )
+        return f"{os.getenv('R2_PUBLIC_URL', '').rstrip('/')}/{key}"
+    except Exception:
+        return None
+
+
 # --- EVENTOS PRINCIPALES ---
 @bot.event
 async def on_ready():
@@ -264,7 +315,12 @@ async def on_message(message: discord.Message):
         if message.content:
             for m in _GIF_RE.finditer(message.content):
                 try:
-                    await save_gif_url(message.guild.id, m.group(0))
+                    url = m.group(0)
+                    if "cdn.discordapp.com" in url:
+                        r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, message.guild.id)
+                        if r2_url:
+                            url = r2_url
+                    await save_gif_url(message.guild.id, url)
                 except Exception:
                     pass
 
@@ -274,7 +330,12 @@ async def on_message(message: discord.Message):
                 (attachment.content_type and 'gif' in attachment.content_type)
             ):
                 try:
-                    await save_gif_url(message.guild.id, attachment.url)
+                    url = attachment.url
+                    if "cdn.discordapp.com" in url:
+                        r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, message.guild.id)
+                        if r2_url:
+                            url = r2_url
+                    await save_gif_url(message.guild.id, url)
                 except Exception:
                     pass
 
@@ -382,7 +443,12 @@ async def refeed_slash(interaction: discord.Interaction):
             if msg.content:
                 for m in _GIF_RE.finditer(msg.content):
                     try:
-                        await save_gif_url(interaction.guild.id, m.group(0))
+                        url = m.group(0)
+                        if "cdn.discordapp.com" in url:
+                            r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                            if r2_url:
+                                url = r2_url
+                        await save_gif_url(interaction.guild.id, url)
                     except Exception:
                         pass
 
@@ -392,7 +458,12 @@ async def refeed_slash(interaction: discord.Interaction):
                     (attachment.content_type and 'gif' in attachment.content_type)
                 ):
                     try:
-                        await save_gif_url(interaction.guild.id, attachment.url)
+                        url = attachment.url
+                        if "cdn.discordapp.com" in url:
+                            r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                            if r2_url:
+                                url = r2_url
+                        await save_gif_url(interaction.guild.id, url)
                     except Exception:
                         pass
 
@@ -456,7 +527,12 @@ async def refeed_all_slash(interaction: discord.Interaction):
                 if msg.content:
                     for m in _GIF_RE.finditer(msg.content):
                         try:
-                            await save_gif_url(interaction.guild.id, m.group(0))
+                            url = m.group(0)
+                            if "cdn.discordapp.com" in url:
+                                r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                                if r2_url:
+                                    url = r2_url
+                            await save_gif_url(interaction.guild.id, url)
                         except Exception:
                             pass
 
@@ -466,7 +542,12 @@ async def refeed_all_slash(interaction: discord.Interaction):
                         (attachment.content_type and 'gif' in attachment.content_type)
                     ):
                         try:
-                            await save_gif_url(interaction.guild.id, attachment.url)
+                            url = attachment.url
+                            if "cdn.discordapp.com" in url:
+                                r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                                if r2_url:
+                                    url = r2_url
+                            await save_gif_url(interaction.guild.id, url)
                         except Exception:
                             pass
 
