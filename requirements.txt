@@ -5,3 +5,4 @@ markovify
 boto3
 aiohttp
 requests
+feedparser

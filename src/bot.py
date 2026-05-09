@@ -7,12 +7,13 @@ import hashlib
 import requests
 import aiohttp
 import boto3
+import feedparser
 from botocore.config import Config
 import markovify
 
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from db import (
     init_db,
@@ -26,6 +27,11 @@ from db import (
     save_gif_url,
     get_random_gif,
     count_gif_urls,
+    add_youtube_sub,
+    remove_youtube_sub,
+    list_youtube_subs,
+    get_all_youtube_subs,
+    update_last_video_id,
 )
 
 # Cargar variables de entorno
@@ -209,7 +215,7 @@ async def build_markov_model(guild_id: int) -> markovify.Text | None:
         return None
 
     _markov_cache[key] = model
-    return model
+    return model 
 
 
 async def generate_markov_reply(guild_id: int) -> str | None:
@@ -270,9 +276,52 @@ async def upload_gif_to_r2(url: str, guild_id: int) -> str | None:
 
 
 # --- EVENTOS PRINCIPALES ---
+async def get_latest_video(youtube_channel_id: str) -> dict | None:
+    url = f"https://www.youtube.com/feeds/videos.xml?channel_id={youtube_channel_id}"
+    try:
+        feed = await asyncio.to_thread(feedparser.parse, url)
+        if not feed.entries:
+            return None
+        entry = feed.entries[0]
+        video_id = getattr(entry, "yt_videoid", None) or entry.get("id", "").split(":")[-1]
+        return {
+            "id": video_id,
+            "title": entry.get("title", ""),
+            "url": entry.get("link", ""),
+            "author": entry.get("author", ""),
+        }
+    except Exception:
+        return None
+
+
+@tasks.loop(minutes=15)
+async def check_youtube():
+    subs = await get_all_youtube_subs()
+    for sub in subs:
+        try:
+            video = await get_latest_video(sub["youtube_channel_id"])
+            if video is None:
+                continue
+            if video["id"] != sub["last_video_id"]:
+                channel = bot.get_channel(sub["discord_channel_id"])
+                if channel and isinstance(channel, discord.TextChannel):
+                    embed = discord.Embed(
+                        title=video["title"],
+                        url=video["url"],
+                        description=f"Nuevo video de **{video['author']}**",
+                        color=discord.Color.red(),
+                    )
+                    await channel.send(embed=embed)
+                await update_last_video_id(sub["guild_id"], sub["youtube_channel_id"], video["id"])
+        except Exception as e:
+            print(f"[YouTube] Error procesando {sub['youtube_channel_id']}: {e}")
+
+
 @bot.event
 async def on_ready():
     await init_db()
+    if not check_youtube.is_running():
+        check_youtube.start()
 
     try:
         print("--- Iniciando Sincronización de Comandos ---")
@@ -693,6 +742,93 @@ async def gif_add_slash(interaction: discord.Interaction, url: str):
         await interaction.followup.send(f"✅ GIF guardado. La colección del servidor tiene {total} GIFs en total.")
     else:
         await interaction.followup.send(f"ℹ️ Ese GIF ya estaba en la colección. Total: {total} GIFs.")
+
+
+@bot.tree.command(name="youtube_add", description="Suscribe un canal de YouTube para notificaciones en un canal de Discord.")
+@app_commands.describe(
+    youtube_channel_id="ID del canal de YouTube (empieza con UC...)",
+    discord_channel="Canal de Discord donde se avisarán los nuevos videos",
+)
+async def youtube_add_slash(
+    interaction: discord.Interaction,
+    youtube_channel_id: str,
+    discord_channel: discord.TextChannel,
+):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    video = await get_latest_video(youtube_channel_id)
+    if video is None:
+        await interaction.followup.send("❌ No se pudo obtener información del canal. Verifica el ID.")
+        return
+
+    channel_name = video["author"] or youtube_channel_id
+    channel_id = interaction.channel.id if interaction.channel else 0
+
+    added = await add_youtube_sub(
+        interaction.guild.id,
+        channel_id,
+        youtube_channel_id,
+        channel_name,
+        discord_channel.id,
+    )
+
+    if added:
+        await update_last_video_id(interaction.guild.id, youtube_channel_id, video["id"])
+        await interaction.followup.send(
+            f"✅ Suscrito al canal **{channel_name}**. Los nuevos videos se avisarán en {discord_channel.mention}."
+        )
+    else:
+        await interaction.followup.send(f"ℹ️ Ya estás suscrito al canal **{channel_name}**.")
+
+
+@bot.tree.command(name="youtube_remove", description="Elimina la suscripción a un canal de YouTube.")
+@app_commands.describe(youtube_channel_id="ID del canal de YouTube a eliminar")
+async def youtube_remove_slash(interaction: discord.Interaction, youtube_channel_id: str):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    removed = await remove_youtube_sub(interaction.guild.id, youtube_channel_id)
+    if removed:
+        await interaction.response.send_message(f"✅ Suscripción a `{youtube_channel_id}` eliminada.", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"ℹ️ No había suscripción activa para `{youtube_channel_id}`.", ephemeral=True)
+
+
+@bot.tree.command(name="youtube_list", description="Muestra todas las suscripciones de YouTube activas del servidor.")
+async def youtube_list_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    subs = await list_youtube_subs(interaction.guild.id)
+    if not subs:
+        await interaction.response.send_message("ℹ️ No hay suscripciones de YouTube activas en este servidor.", ephemeral=True)
+        return
+
+    lines = []
+    for sub in subs:
+        dc_channel = interaction.guild.get_channel(sub["discord_channel_id"])
+        dc_mention = dc_channel.mention if dc_channel else f"<#{sub['discord_channel_id']}>"
+        lines.append(f"• **{sub['youtube_channel_name']}** (`{sub['youtube_channel_id']}`) → {dc_mention}")
+
+    await interaction.response.send_message(
+        "**Suscripciones de YouTube activas:**\n" + "\n".join(lines),
+        ephemeral=True,
+    )
 
 
 if __name__ == "__main__":
