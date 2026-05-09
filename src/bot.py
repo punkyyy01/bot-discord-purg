@@ -240,6 +240,8 @@ def upload_gif_to_r2_sync(url: str, guild_id: int) -> str | None:
         )
         return f"{os.getenv('R2_PUBLIC_URL', '').rstrip('/')}/{key}"
     except Exception:
+        import traceback
+        print(f"[R2 ERROR] {traceback.format_exc()}")
         return None
 
 
