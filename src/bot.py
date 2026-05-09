@@ -186,8 +186,7 @@ def clean_for_corpus(text: str) -> str | None:
 
 
 async def build_markov_model(guild_id: int) -> markovify.Text | None:
-    key = guild_id
-    cached = _markov_cache.get(key)
+    cached = _markov_cache.get(guild_id)
     if cached is not None:
         return cached
 
@@ -201,8 +200,8 @@ async def build_markov_model(guild_id: int) -> markovify.Text | None:
     except Exception:
         return None
 
-    _markov_cache[key] = model
-    return model 
+    _markov_cache[guild_id] = model
+    return model
 
 
 async def generate_markov_reply(guild_id: int) -> str | None:
@@ -456,7 +455,11 @@ async def refeed_slash(interaction: discord.Interaction):
     last_msg_id: int | None = None
     while fetched < _REFEED_MAX_MESSAGES:
         before_obj = discord.Object(id=last_msg_id) if last_msg_id else None
-        batch = [msg async for msg in channel.history(limit=100, before=before_obj, oldest_first=False)]
+        try:
+            batch = [msg async for msg in channel.history(limit=100, before=before_obj, oldest_first=False)]
+        except discord.Forbidden:
+            await interaction.followup.send("❌ Sin permisos para leer el historial de este canal.")
+            return
         if not batch:
             break
         fetched += len(batch)
@@ -540,7 +543,10 @@ async def refeed_all_slash(interaction: discord.Interaction):
         last_msg_id: int | None = None
         while total_fetched < _REFEED_MAX_MESSAGES:
             before_obj = discord.Object(id=last_msg_id) if last_msg_id else None
-            batch = [msg async for msg in channel.history(limit=100, before=before_obj, oldest_first=False)]
+            try:
+                batch = [msg async for msg in channel.history(limit=100, before=before_obj, oldest_first=False)]
+            except discord.Forbidden:
+                break
             if not batch:
                 break
             total_fetched += len(batch)
