@@ -12,7 +12,7 @@ import feedparser
 from collections import OrderedDict
 from logging.handlers import RotatingFileHandler
 from botocore.config import Config
-import markovify
+from markov_engine import SimpleMarkov
 
 import discord
 from discord import app_commands
@@ -243,7 +243,7 @@ def clean_for_corpus(text: str) -> str | None:
     return t
 
 
-async def build_markov_model(guild_id: int) -> markovify.Text | None:
+async def build_markov_model(guild_id: int) -> SimpleMarkov | None:
     cached = _markov_cache.get(guild_id)
     if cached is not None:
         return cached
@@ -252,9 +252,13 @@ async def build_markov_model(guild_id: int) -> markovify.Text | None:
     if len(corpus) < 50:
         return None
 
-    text = "\n".join(corpus)
+    def build() -> SimpleMarkov:
+        m = SimpleMarkov()
+        m.add_many(corpus)
+        return m
+
     try:
-        model = await asyncio.to_thread(markovify.Text, text, state_size=1, well_formed=False)
+        model = await asyncio.to_thread(build)
     except Exception:
         log.exception("Error construyendo modelo Markov para guild %s", guild_id)
         return None
@@ -265,18 +269,21 @@ async def build_markov_model(guild_id: int) -> markovify.Text | None:
 
 async def generate_markov_reply(guild_id: int) -> str | None:
     model = await build_markov_model(guild_id)
-    if not model:
+    if not model or model.is_empty:
         return None
 
     try:
-        sentence = model.make_short_sentence(max_chars=60, tries=50)
+        sentence = await asyncio.to_thread(
+            model.generate,
+            max_words=20,
+            max_attempts=5,
+            min_words=1,
+        )
     except Exception:
         log.exception("Error generando frase Markov para guild %s", guild_id)
         sentence = None
 
-    if sentence:
-        return sentence
-    return None
+    return sentence
 
 
 async def generate_markov_for_user(guild_id: int, author_id: int) -> str | None:
@@ -286,20 +293,30 @@ async def generate_markov_for_user(guild_id: int, author_id: int) -> str | None:
         corpus = await get_user_messages(guild_id, author_id)
         if len(corpus) < 30:
             return None
-        text = "\n".join(corpus)
+
+        def build() -> SimpleMarkov:
+            m = SimpleMarkov()
+            m.add_many(corpus)
+            return m
+
         try:
-            model = await asyncio.to_thread(markovify.Text, text, state_size=1, well_formed=False)
+            model = await asyncio.to_thread(build)
         except Exception:
             log.exception("Error construyendo modelo Markov para usuario %s", author_id)
             return None
         _user_markov_cache[key] = model
 
     try:
-        sentence = model.make_short_sentence(max_chars=80, tries=50)
+        sentence = await asyncio.to_thread(
+            model.generate,
+            max_words=20,
+            max_attempts=5,
+            min_words=1,
+        )
     except Exception:
         log.exception("Error generando frase Markov para usuario %s", author_id)
         sentence = None
-    return sentence if sentence else None
+    return sentence
 
 
 def upload_gif_to_r2_sync(url: str, guild_id: int) -> str | None:
@@ -457,6 +474,7 @@ async def on_message(message: discord.Message):
             inserted, user_inserted = await save_corpus_and_user_message(
                 message.guild.id, message.channel.id,
                 message.author.id, message.author.display_name, cleaned,
+                message_id=message.id,
             )
             if user_inserted:
                 _note_user_corpus_insert(message.guild.id, message.author.id)
@@ -594,6 +612,7 @@ async def refeed_slash(interaction: discord.Interaction):
             corpus_ins, user_ins = await save_corpus_and_user_message(
                 interaction.guild.id, msg.channel.id,
                 msg.author.id, msg.author.display_name, cleaned,
+                message_id=msg.id,
             )
             if corpus_ins:
                 saved += 1
@@ -689,6 +708,7 @@ async def refeed_all_slash(interaction: discord.Interaction):
                 corpus_ins, user_ins = await save_corpus_and_user_message(
                     interaction.guild.id, msg.channel.id,
                     msg.author.id, msg.author.display_name, cleaned,
+                    message_id=msg.id,
                 )
                 if corpus_ins:
                     saved += 1

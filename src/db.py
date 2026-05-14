@@ -30,9 +30,10 @@ CREATE TABLE IF NOT EXISTS corpus_messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id INTEGER NOT NULL,
     channel_id INTEGER NOT NULL,
+    message_id INTEGER,
     content TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(guild_id, channel_id, content)
+    UNIQUE(guild_id, message_id)
 );
 
 CREATE TABLE IF NOT EXISTS corpus_gifs (
@@ -59,45 +60,12 @@ CREATE TABLE IF NOT EXISTS user_corpus (
     guild_id INTEGER NOT NULL,
     author_id INTEGER NOT NULL,
     author_name TEXT NOT NULL,
+    message_id INTEGER,
     content TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(guild_id, author_id, content)
+    UNIQUE(guild_id, message_id)
 );
 """
-
-
-async def _migrate_corpus_uniqueness(db: aiosqlite.Connection):
-    """Asegura unicidad del corpus por (guild, channel, content).
-
-    Para bases existentes, deduplica y luego crea un índice único (SQLite no permite
-    agregar constraints UNIQUE a una tabla existente sin recrearla).
-    Solo ejecuta el DELETE la primera vez; si el índice ya existe lo omite.
-    """
-    async with _db_lock:
-        try:
-            async with db.execute(
-                "SELECT name FROM sqlite_master WHERE type='index' AND name='corpus_messages_unique_idx'"
-            ) as cur:
-                already_migrated = await cur.fetchone() is not None
-
-            if not already_migrated:
-                cur = await db.execute(
-                    "DELETE FROM corpus_messages "
-                    "WHERE id NOT IN ("
-                    "  SELECT MIN(id) FROM corpus_messages GROUP BY guild_id, channel_id, content"
-                    ")"
-                )
-                if cur.rowcount:
-                    log.info("Migración: eliminados %d duplicados de corpus_messages", cur.rowcount)
-
-            await db.execute(
-                "CREATE UNIQUE INDEX IF NOT EXISTS corpus_messages_unique_idx "
-                "ON corpus_messages(guild_id, channel_id, content)"
-            )
-            await db.commit()
-        except Exception:
-            log.exception("Migración de unicidad falló")
-            raise
 
 
 async def init_db():
@@ -111,7 +79,6 @@ async def init_db():
     await _db.execute("PRAGMA synchronous=NORMAL")
     # Crear tablas
     await _db.executescript(SCHEMA)
-    await _migrate_corpus_uniqueness(_db)
     try:
         await _db.execute("ALTER TABLE youtube_subscriptions ADD COLUMN mention_role_id INTEGER")
         await _db.commit()
@@ -158,7 +125,7 @@ async def get_chat_settings(guild_id: int):
         return {"enabled": bool(row[0]), "channel_id": row[1]}
 
 
-async def save_corpus_message(guild_id: int, channel_id: int, content: str) -> bool:
+async def save_corpus_message(guild_id: int, channel_id: int, content: str, message_id: int | None = None) -> bool:
     text = (content or "").strip()
     if not text:
         return False
@@ -166,8 +133,8 @@ async def save_corpus_message(guild_id: int, channel_id: int, content: str) -> b
     db = await get_db()
     async with _db_lock:
         cursor = await db.execute(
-            "INSERT OR IGNORE INTO corpus_messages (guild_id, channel_id, content) VALUES (?, ?, ?)",
-            (guild_id, channel_id, text),
+            "INSERT OR IGNORE INTO corpus_messages (guild_id, channel_id, message_id, content) VALUES (?, ?, ?, ?)",
+            (guild_id, channel_id, message_id, text),
         )
         inserted = _was_inserted(cursor)
         await db.commit()
@@ -180,6 +147,7 @@ async def save_corpus_and_user_message(
     author_id: int,
     author_name: str,
     content: str,
+    message_id: int | None = None,
 ) -> tuple[bool, bool]:
     text = (content or "").strip()
     if not text:
@@ -188,13 +156,13 @@ async def save_corpus_and_user_message(
     db = await get_db()
     async with _db_lock:
         cur1 = await db.execute(
-            "INSERT OR IGNORE INTO corpus_messages (guild_id, channel_id, content) VALUES (?, ?, ?)",
-            (guild_id, channel_id, text),
+            "INSERT OR IGNORE INTO corpus_messages (guild_id, channel_id, message_id, content) VALUES (?, ?, ?, ?)",
+            (guild_id, channel_id, message_id, text),
         )
         corpus_inserted = _was_inserted(cur1)
         cur2 = await db.execute(
-            "INSERT OR IGNORE INTO user_corpus (guild_id, author_id, author_name, content) VALUES (?, ?, ?, ?)",
-            (guild_id, author_id, author_name, text),
+            "INSERT OR IGNORE INTO user_corpus (guild_id, author_id, author_name, message_id, content) VALUES (?, ?, ?, ?, ?)",
+            (guild_id, author_id, author_name, message_id, text),
         )
         user_inserted = _was_inserted(cur2)
         await db.commit()
@@ -375,7 +343,7 @@ async def set_youtube_mention_role(guild_id: int, youtube_channel_id: str, role_
     return updated
 
 
-async def save_user_message(guild_id: int, author_id: int, author_name: str, content: str) -> bool:
+async def save_user_message(guild_id: int, author_id: int, author_name: str, content: str, message_id: int | None = None) -> bool:
     text = (content or "").strip()
     if not text:
         return False
@@ -383,8 +351,8 @@ async def save_user_message(guild_id: int, author_id: int, author_name: str, con
     db = await get_db()
     async with _db_lock:
         cursor = await db.execute(
-            "INSERT OR IGNORE INTO user_corpus (guild_id, author_id, author_name, content) VALUES (?, ?, ?, ?)",
-            (guild_id, author_id, author_name, text),
+            "INSERT OR IGNORE INTO user_corpus (guild_id, author_id, author_name, message_id, content) VALUES (?, ?, ?, ?, ?)",
+            (guild_id, author_id, author_name, message_id, text),
         )
         inserted = _was_inserted(cursor)
         await db.commit()
