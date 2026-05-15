@@ -18,7 +18,7 @@ class SimpleMarkov:
         self.transitions: dict[str, list[str]] = defaultdict(list)
 
     def add(self, message: str) -> None:
-        words = message.split()
+        words = message.lower().split()
         if not words:
             return
         prev = self.START

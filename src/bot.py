@@ -209,7 +209,7 @@ def post_process_reply(text: str) -> str:
 _ANSI_ESCAPE_RE = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
 _ANSI_BRACKET_RE = re.compile(r'\]\d*;[^\]]*')
 _URL_RE = re.compile(r'https?://\S+', re.IGNORECASE)
-_DISCORD_MENTIONS_RE = re.compile(r'<@!?\d+>|<#\d+>|<@&\d+>')
+_DISCORD_MENTIONS_RE = re.compile(r'<a?:\w+:\d+>|<@!?\d+>|<#\d+>|<@&\d+>')
 
 
 def clean_for_corpus(text: str) -> str | None:
