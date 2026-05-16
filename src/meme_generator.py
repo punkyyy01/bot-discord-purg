@@ -63,6 +63,9 @@ def render_meme(image_bytes: bytes, caption: str) -> bytes:
     line_h = ascent + descent
 
     padding_v = int(img_w * 0.08)
+    min_banner_h = int(img_h * 0.12)
+    if len(lines) * line_h + 2 * padding_v < min_banner_h:
+        padding_v = (min_banner_h - len(lines) * line_h) // 2
     banner_h = len(lines) * line_h + 2 * padding_v
 
     out = Image.new("RGB", (img_w, banner_h + img_h), "white")
