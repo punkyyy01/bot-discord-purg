@@ -37,7 +37,7 @@ def render_meme(image_bytes: bytes, caption: str) -> bytes:
     padding_h = int(img_w * 0.05)
     usable_w = img_w - 2 * padding_h
 
-    font_size = min(52, max(20, img_w // 16))
+    font_size = max(24, img_w // 12)
     font = None
     lines: list[str] = []
 
