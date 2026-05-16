@@ -71,6 +71,14 @@ CREATE TABLE IF NOT EXISTS ignored_channels (
     channel_id INTEGER NOT NULL,
     PRIMARY KEY (guild_id, channel_id)
 );
+
+CREATE TABLE IF NOT EXISTS meme_schedule (
+    guild_id INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
+    interval_minutes INTEGER NOT NULL DEFAULT 180,
+    last_posted_at TEXT,
+    PRIMARY KEY (guild_id, channel_id)
+);
 """
 
 
@@ -435,3 +443,64 @@ async def is_channel_ignored(guild_id: int, channel_id: int) -> bool:
     ) as cursor:
         row = await cursor.fetchone()
     return row is not None
+
+
+async def add_meme_schedule(guild_id: int, channel_id: int, interval_minutes: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR REPLACE INTO meme_schedule (guild_id, channel_id, interval_minutes) VALUES (?, ?, ?)",
+            (guild_id, channel_id, interval_minutes),
+        )
+        inserted = cursor.rowcount > 0
+        await db.commit()
+    return inserted
+
+
+async def remove_meme_schedule(guild_id: int, channel_id: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "DELETE FROM meme_schedule WHERE guild_id=? AND channel_id=?",
+            (guild_id, channel_id),
+        )
+        removed = cursor.rowcount > 0
+        await db.commit()
+    return removed
+
+
+async def list_meme_schedules(guild_id: int) -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT channel_id, interval_minutes, last_posted_at FROM meme_schedule WHERE guild_id=? ORDER BY channel_id",
+        (guild_id,),
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {"channel_id": r[0], "interval_minutes": r[1], "last_posted_at": r[2]}
+        for r in rows
+    ]
+
+
+async def get_due_meme_schedules() -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT guild_id, channel_id, interval_minutes FROM meme_schedule "
+        "WHERE last_posted_at IS NULL "
+        "   OR datetime(last_posted_at, '+' || interval_minutes || ' minutes') <= datetime('now')"
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {"guild_id": r[0], "channel_id": r[1], "interval_minutes": r[2]}
+        for r in rows
+    ]
+
+
+async def update_meme_last_posted(guild_id: int, channel_id: int) -> None:
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "UPDATE meme_schedule SET last_posted_at = datetime('now') WHERE guild_id=? AND channel_id=?",
+            (guild_id, channel_id),
+        )
+        await db.commit()

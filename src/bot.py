@@ -8,6 +8,7 @@ import asyncio
 import hashlib
 import logging
 import requests
+from datetime import datetime
 import boto3
 import feedparser
 from collections import OrderedDict
@@ -44,6 +45,11 @@ from db import (
     remove_ignored_channel,
     list_ignored_channels,
     is_channel_ignored,
+    add_meme_schedule,
+    remove_meme_schedule,
+    list_meme_schedules,
+    get_due_meme_schedules,
+    update_meme_last_posted,
 )
 
 # Cargar variables de entorno
@@ -477,11 +483,57 @@ async def check_youtube():
     await asyncio.gather(*(_check_one(sub) for sub in subs))
 
 
+@tasks.loop(minutes=10)
+async def auto_meme_task():
+    schedules = await get_due_meme_schedules()
+    for schedule in schedules:
+        try:
+            channel = bot.get_channel(schedule["channel_id"])
+            if not channel or not isinstance(channel, discord.TextChannel):
+                continue
+
+            img_bytes = None
+            async for msg in channel.history(limit=200):
+                if msg.author.bot:
+                    continue
+                att = next(
+                    (a for a in msg.attachments
+                     if os.path.splitext(a.filename.lower())[1] in _IMAGE_EXTS),
+                    None,
+                )
+                if att and att.size <= _MEME_MAX_BYTES:
+                    try:
+                        img_bytes = await att.read()
+                        break
+                    except Exception:
+                        continue
+
+            if not img_bytes:
+                continue
+
+            model = await build_markov_model(schedule["guild_id"])
+            if not model or model.is_empty:
+                continue
+
+            text = await asyncio.to_thread(_try_short_sentence, model)
+            if not text:
+                continue
+
+            meme_bytes = await asyncio.to_thread(render_meme, img_bytes, text)
+            await channel.send(file=discord.File(io.BytesIO(meme_bytes), filename="meme.png"))
+            await update_meme_last_posted(schedule["guild_id"], schedule["channel_id"])
+
+        except Exception:
+            log.exception("Error en auto_meme_task para canal %s", schedule["channel_id"])
+
+
 @bot.event
 async def on_ready():
     await init_db()
     if not check_youtube.is_running():
         check_youtube.start()
+    if not auto_meme_task.is_running():
+        auto_meme_task.start()
 
     try:
         log.info("Iniciando sincronización de comandos")
@@ -1166,6 +1218,94 @@ async def corpus_ignorar_lista(interaction: discord.Interaction):
 
 
 bot.tree.add_command(_corpus_ignorar)
+
+
+_meme_auto = app_commands.Group(
+    name="meme_auto",
+    description="Gestiona los memes automáticos por canal",
+)
+
+
+@_meme_auto.command(name="activar", description="Activa memes automáticos en un canal.")
+@app_commands.describe(
+    canal="Canal donde se postarán los memes",
+    intervalo="Intervalo en horas (mínimo 2, máximo 24)",
+)
+async def meme_auto_activar(interaction: discord.Interaction, canal: discord.TextChannel, intervalo: int):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    if intervalo < 2:
+        await interaction.response.send_message("el intervalo mínimo es 2 horas", ephemeral=True)
+        return
+    if intervalo > 24:
+        await interaction.response.send_message("el intervalo máximo es 24 horas", ephemeral=True)
+        return
+    await add_meme_schedule(interaction.guild.id, canal.id, intervalo * 60)
+    await interaction.response.send_message(
+        f"✅ Memes automáticos activados en {canal.mention} cada {intervalo} horas.",
+        ephemeral=True,
+    )
+
+
+@_meme_auto.command(name="desactivar", description="Desactiva los memes automáticos en un canal.")
+@app_commands.describe(canal="Canal donde desactivar los memes automáticos")
+async def meme_auto_desactivar(interaction: discord.Interaction, canal: discord.TextChannel):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    removed = await remove_meme_schedule(interaction.guild.id, canal.id)
+    if removed:
+        await interaction.response.send_message(
+            f"✅ Memes automáticos desactivados en {canal.mention}.",
+            ephemeral=True,
+        )
+    else:
+        await interaction.response.send_message(
+            f"ℹ️ ese canal no tenía memes automáticos",
+            ephemeral=True,
+        )
+
+
+@_meme_auto.command(name="lista", description="Muestra los canales con memes automáticos configurados.")
+async def meme_auto_lista(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    schedules = await list_meme_schedules(interaction.guild.id)
+    if not schedules:
+        await interaction.response.send_message("ℹ️ no hay canales configurados", ephemeral=True)
+        return
+    lines = []
+    now = datetime.utcnow()
+    for s in schedules:
+        horas = s["interval_minutes"] // 60
+        if s["last_posted_at"] is not None:
+            try:
+                last_dt = datetime.fromisoformat(s["last_posted_at"])
+                delta_h = int((now - last_dt).total_seconds() // 3600)
+                ultimo = f"hace {delta_h} horas"
+            except Exception:
+                ultimo = "desconocido"
+        else:
+            ultimo = "nunca"
+        lines.append(f"• <#{s['channel_id']}> — cada {horas} horas — último: {ultimo}")
+    await interaction.response.send_message(
+        "**Memes automáticos:**\n" + "\n".join(lines),
+        ephemeral=True,
+    )
+
+
+bot.tree.add_command(_meme_auto)
 
 
 if __name__ == "__main__":
