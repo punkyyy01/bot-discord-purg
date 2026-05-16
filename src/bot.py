@@ -231,6 +231,7 @@ def clean_for_corpus(text: str) -> str | None:
     # Eliminar URLs y menciones Discord
     t = _URL_RE.sub(" ", t)
     t = _DISCORD_MENTIONS_RE.sub(" ", t)
+    t = re.sub(r'\b\d{5,}\b', '', t)
 
     # Eliminar líneas que sean solo números/símbolos/caracteres especiales
     kept_lines: list[str] = []

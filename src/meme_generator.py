@@ -8,13 +8,16 @@ _FONT_PATH = os.path.join(_BASE_DIR, "Impact.ttf")
 
 
 def _try_short_sentence(model, max_chars: int = 80, tries: int = 100) -> str | None:
+    import re
+    _DIGITS_RE = re.compile(r'\b\d{5,}\b')
     for _ in range(tries):
-        candidate = model.generate(max_words=15, max_attempts=1, min_words=1)
+        candidate = model.generate(max_words=12, max_attempts=1, min_words=2)
+        if not candidate:
+            continue
+        candidate = _DIGITS_RE.sub('', candidate).strip()
+        candidate = re.sub(r'\s+', ' ', candidate).strip()
         if candidate and len(candidate) <= max_chars:
             return candidate
-    candidate = model.generate(max_words=30, max_attempts=5, min_words=1)
-    if candidate:
-        return candidate[:max_chars].strip()
     return None
 
 
@@ -29,7 +32,7 @@ def render_meme(image_bytes: bytes, caption: str) -> bytes:
     padding_h = int(img_w * 0.05)
     usable_w = img_w - 2 * padding_h
 
-    font_size = max(20, img_w // 10)
+    font_size = min(52, max(20, img_w // 16))
     font = None
     lines: list[str] = []
 
