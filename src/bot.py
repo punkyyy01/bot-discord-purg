@@ -1450,6 +1450,69 @@ async def meme_auto_lista(interaction: discord.Interaction):
 bot.tree.add_command(_meme_auto)
 
 
+@bot.tree.command(name="meme_test", description="Genera un meme ahora mismo (test).")
+async def meme_test_slash(interaction: discord.Interaction):
+    if not has_allowed_role(interaction):
+        await interaction.response.send_message("❌ Sin permisos.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    if not interaction.guild:
+        await interaction.followup.send("Solo en servidores.", ephemeral=True)
+        return
+
+    try:
+        image_url = await get_random_image_url(interaction.guild.id)
+        if not image_url:
+            await interaction.followup.send(
+                "Sin imágenes en el pool todavía. Sube algunas fotos al server primero.",
+                ephemeral=True,
+            )
+            return
+
+        try:
+            img_resp = await asyncio.to_thread(requests.get, image_url, timeout=15)
+            if img_resp.status_code != 200:
+                await interaction.followup.send("No se pudo descargar la imagen.", ephemeral=True)
+                return
+            img_bytes = img_resp.content
+        except Exception:
+            log.exception("meme_test: error descargando imagen %s", image_url)
+            await interaction.followup.send("No se pudo descargar la imagen.", ephemeral=True)
+            return
+
+        if len(img_bytes) > _MEME_MAX_BYTES:
+            await interaction.followup.send("La imagen pesa mucho.", ephemeral=True)
+            return
+
+        corpus_sample = await get_corpus_messages(interaction.guild.id, limit=100)
+        if not corpus_sample:
+            await interaction.followup.send("El corpus está vacío.", ephemeral=True)
+            return
+
+        caption = await generate_groq_meme_caption(img_bytes, corpus_sample)
+        if caption is None:
+            model = await build_markov_model(interaction.guild.id)
+            caption = await asyncio.to_thread(
+                _try_short_sentence, model
+            ) if model and not model.is_empty else None
+
+        if not caption:
+            await interaction.followup.send("No se pudo generar el caption.", ephemeral=True)
+            return
+
+        meme_bytes = await asyncio.to_thread(render_meme, img_bytes, caption)
+        await interaction.channel.send(
+            file=discord.File(io.BytesIO(meme_bytes), filename="meme.png")
+        )
+        await interaction.followup.send("✅ Meme generado.", ephemeral=True)
+
+    except Exception:
+        log.exception("meme_test: error inesperado")
+        await interaction.followup.send("se rompió algo, revisa los logs.", ephemeral=True)
+
+
 if __name__ == "__main__":
     try:
         bot.run(TOKEN)
