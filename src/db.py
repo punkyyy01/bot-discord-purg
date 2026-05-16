@@ -107,6 +107,13 @@ async def init_db():
     except Exception:
         log.debug("Columna mention_role_id ya existe en youtube_subscriptions")
     await _db.commit()
+    flag_path = os.path.join(DATA_DIR, ".images_wiped_v2")
+    if not os.path.exists(flag_path):
+        await _db.execute("DELETE FROM corpus_images")
+        await _db.commit()
+        with open(flag_path, "w") as f:
+            f.write("done")
+        log.info("corpus_images wipeado - migracion v2")
 
 
 async def close_db():

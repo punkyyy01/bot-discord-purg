@@ -571,3 +571,26 @@ async def count_image_urls(guild_id: int) -> int:
     ) as cursor:
         row = await cursor.fetchone()
     return int(row[0] if row else 0)
+
+
+async def get_random_image_url_excluding(
+    guild_id: int,
+    exclude_url: str | None = None,
+) -> str | None:
+    db = await get_db()
+    if exclude_url:
+        async with db.execute(
+            "SELECT url FROM corpus_images "
+            "WHERE guild_id=? AND url != ? "
+            "ORDER BY RANDOM() LIMIT 1",
+            (guild_id, exclude_url),
+        ) as cursor:
+            row = await cursor.fetchone()
+    else:
+        async with db.execute(
+            "SELECT url FROM corpus_images "
+            "WHERE guild_id=? ORDER BY RANDOM() LIMIT 1",
+            (guild_id,),
+        ) as cursor:
+            row = await cursor.fetchone()
+    return row[0] if row else None

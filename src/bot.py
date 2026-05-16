@@ -498,24 +498,48 @@ async def generate_groq_meme_caption(
     image_bytes: bytes,
     corpus_sample: list[str],
 ) -> str | None:
-    """
-    Llama a Groq Vision para generar un caption de meme.
-    Paso 1: describe la imagen.
-    Paso 2: genera el caption usando la descripción + muestra del corpus.
-    Retorna el caption o None si falla.
-    """
     if not _groq_client:
         log.warning("GROQ_API_KEY no configurada")
         return None
 
     import base64
     image_b64 = base64.standard_b64encode(image_bytes).decode("utf-8")
+    corpus_text = "\n".join(f"- {msg}" for msg in corpus_sample[:400])
 
-    # Paso 1: describir la imagen
+    few_shot = (
+        "EJEMPLOS de captions correctos:\n"
+        "Imagen: foto de alguien durmiendo\n"
+        "Caption: YO A LAS 3AM DESPUES DE PROMETER QUE ME DUERMO TEMPRANO\n\n"
+        "Imagen: gato mirando fijo a la cámara\n"
+        "Caption: CUANDO TE DICEN QUE EL DRAMA ES TUYO\n\n"
+        "Imagen: dos personas discutiendo\n"
+        "Caption: EL CHAT A LAS 2AM SIN RAZON\n\n"
+        "IMPORTANTE: el caption NO describe la imagen literalmente. "
+        "Conecta lo que se ve con algo gracioso, absurdo o del server. "
+        "Máximo 80 caracteres. Solo el caption, nada más.\n\n"
+    )
+
+    system_prompt = (
+        "Eres un generador de memes para un servidor de Discord en español. "
+        "Tu trabajo es escribir UN caption corto (máx 80 caracteres) "
+        "que suene exactamente como la gente de este servidor. "
+        "Usa su vocabulario, sus expresiones, su humor. "
+        "Máximo 80 caracteres. Solo el caption, nada más."
+    )
+
+    user_prompt = (
+        f"{few_shot}"
+        f"Mensajes reales del servidor (imita este estilo):\n"
+        f"{corpus_text}\n\n"
+        f"Ahora genera UN caption para la imagen adjunta. "
+        f"Que suene a esta gente. Máximo 80 caracteres."
+    )
+
     try:
-        vision_response = await _groq_client.chat.completions.create(
+        response = await _groq_client.chat.completions.create(
             model="meta-llama/llama-4-scout-17b-16e-instruct",
             messages=[
+                {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": [
@@ -525,67 +549,23 @@ async def generate_groq_meme_caption(
                                 "url": f"data:image/jpeg;base64,{image_b64}"
                             },
                         },
-                        {
-                            "type": "text",
-                            "text": (
-                                "Describe this image in detail in SPANISH. Include: "
-                                "what you see, any visible text, the mood, what's absurd "
-                                "or funny about it, and any cultural context you recognize. "
-                                "2-3 sentences max. Be direct, no preamble."
-                            ),
-                        },
+                        {"type": "text", "content": user_prompt},
                     ],
-                }
+                },
             ],
-            max_tokens=150,
-        )
-        image_description = vision_response.choices[0].message.content.strip()
-    except Exception:
-        log.exception("Error en Groq Vision paso 1 (descripción)")
-        return None
-
-    # Paso 2: generar caption con contexto del server
-    corpus_text = "\n".join(f"- {msg}" for msg in corpus_sample[:100])
-    system_prompt = (
-        "Eres un generador de captions para memes de un servidor de Discord "
-        "donde todos hablan español. "
-        "Tu trabajo es escribir un caption corto que combine: "
-        "1) algo gracioso, absurdo o específico de la imagen "
-        "2) el vocabulario y humor exacto de los miembros del servidor. "
-        "El caption tiene que sonar como si uno de ellos lo hubiera escrito, "
-        "no como un chiste genérico de Facebook. "
-        "Sé irreverente, caótico, sin filtro. "
-        "Máximo 80 caracteres. Responde SOLO con el caption, nada más."
-    )
-    user_prompt = (
-        f"La imagen muestra: {image_description}\n\n"
-        f"Estos son mensajes REALES de los miembros del servidor "
-        f"(usa su vocabulario y humor):\n"
-        f"{corpus_text}\n\n"
-        f"Escribe UN caption (máx 80 caracteres) que conecte algo de la imagen "
-        f"con cómo habla esta gente. Que dé risa. Solo el caption."
-    )
-
-    try:
-        caption_response = await _groq_client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            max_tokens=80,
+            max_tokens=60,
             temperature=0.9,
         )
-        caption = caption_response.choices[0].message.content.strip()
+        caption = response.choices[0].message.content.strip()
         caption = caption.strip('"').strip("'").strip()
         if len(caption) > 80:
             caption = caption[:80].rsplit(" ", 1)[0].strip()
         return caption if caption else None
     except Exception as e:
         if "429" in str(e) or "rate_limit" in str(e).lower():
-            log.warning("Groq rate limit alcanzado, fallback a Markov")
+            log.warning("Groq rate limit, fallback a Markov")
             return None
-        log.exception("Error en Groq Vision paso 2 (caption)")
+        log.exception("Error en Groq caption")
         return None
 
 
@@ -763,14 +743,6 @@ async def on_message(message: discord.Message):
                 except Exception:
                     log.exception("Error guardando GIF adjunto: %s", attachment.url)
 
-        for attachment in message.attachments:
-            ext = os.path.splitext(attachment.filename.lower())[1]
-            if ext in {".png", ".jpg", ".jpeg", ".webp"} and attachment.size <= _MEME_MAX_BYTES:
-                try:
-                    await save_image_url(message.guild.id, attachment.url)
-                except Exception:
-                    log.exception("Error guardando imagen en corpus: %s", attachment.url)
-
         cleaned = clean_for_corpus(message.content or "")
         inserted = False
         if cleaned is not None:
@@ -843,6 +815,40 @@ async def on_message(message: discord.Message):
     reply = post_process_reply(reply) if reply else "..."
     for chunk in chunk_message(reply):
         await message.reply(chunk)
+
+
+@bot.event
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    if str(payload.emoji) != "🎯":
+        return
+    if payload.guild_id is None:
+        return
+    channel = bot.get_channel(payload.channel_id)
+    if not isinstance(channel, discord.TextChannel):
+        return
+    try:
+        message = await channel.fetch_message(payload.message_id)
+    except Exception:
+        return
+    if message.author.bot:
+        return
+    added = False
+    for attachment in message.attachments:
+        ext = os.path.splitext(attachment.filename.lower())[1]
+        if ext in {".png", ".jpg", ".jpeg", ".webp"} \
+                and attachment.size <= _MEME_MAX_BYTES:
+            try:
+                inserted = await save_image_url(payload.guild_id, attachment.url)
+                if inserted:
+                    added = True
+                    log.info("Imagen agregada al pool 🎯: %s", attachment.url)
+            except Exception:
+                log.exception("Error guardando imagen por reaccion")
+    if added:
+        try:
+            await message.add_reaction("✅")
+        except Exception:
+            pass
 
 
 # --- COMANDOS BÁSICOS ---
@@ -1016,18 +1022,6 @@ async def refeed_all_slash(interaction: discord.Interaction):
                             await save_gif_url(interaction.guild.id, url)
                         except Exception:
                             log.exception("Error procesando GIF adjunto en refeed_all: %s", attachment.url)
-
-                for attachment in msg.attachments:
-                    ext = os.path.splitext(attachment.filename.lower())[1]
-                    if ext in {".png", ".jpg", ".jpeg", ".webp"} \
-                            and attachment.size <= _MEME_MAX_BYTES:
-                        try:
-                            await save_image_url(interaction.guild.id, attachment.url)
-                        except Exception:
-                            log.exception(
-                                "Error guardando imagen en refeed_all: %s",
-                                attachment.url
-                            )
 
                 cleaned = clean_for_corpus(msg.content or "")
                 if cleaned is None:

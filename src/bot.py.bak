@@ -54,6 +54,7 @@ from db import (
     save_image_url,
     get_random_image_url,
     count_image_urls,
+    get_random_image_url_excluding,
 )
 
 # Cargar variables de entorno
@@ -117,6 +118,8 @@ _message_counter: _LRUDict = _LRUDict(256)
 _corpus_insert_counter: _LRUDict = _LRUDict(256)
 _user_markov_cache: _LRUDict = _LRUDict(64)
 _user_corpus_insert_counter: _LRUDict = _LRUDict(256)
+_momo_cooldowns: dict[int, float] = {}
+_last_meme_image: dict[int, str] = {}
 
 _GIF_RE = re.compile(r'https?://\S*(tenor\.com|giphy\.com|cdn\.discordapp\.com/attachments/\S*\.gif)\S*', re.IGNORECASE)
 _REFEED_MAX_MESSAGES = 20_000
@@ -525,9 +528,10 @@ async def generate_groq_meme_caption(
                         {
                             "type": "text",
                             "text": (
-                                "Describe this image briefly in 1-2 sentences. "
-                                "Focus on what's happening, the mood, and any "
-                                "notable elements. Be direct, no preamble."
+                                "Describe this image in detail in SPANISH. Include: "
+                                "what you see, any visible text, the mood, what's absurd "
+                                "or funny about it, and any cultural context you recognize. "
+                                "2-3 sentences max. Be direct, no preamble."
                             ),
                         },
                     ],
@@ -543,22 +547,23 @@ async def generate_groq_meme_caption(
     # Paso 2: generar caption con contexto del server
     corpus_text = "\n".join(f"- {msg}" for msg in corpus_sample[:100])
     system_prompt = (
-        "You are a meme caption generator for a specific Discord server. "
-        "Your job is to write a SHORT, FUNNY meme caption (maximum 80 characters) "
-        "that fits the image described. "
-        "The caption must sound EXACTLY like the server members talk — "
-        "use their vocabulary, their humor style, their expressions. "
-        "Be irreverent, unfiltered, and funny. No corporate speak. "
-        "Respond with ONLY the caption text, nothing else. "
-        "No quotes, no explanation, just the caption."
+        "Eres un generador de captions para memes de un servidor de Discord "
+        "donde todos hablan español. "
+        "Tu trabajo es escribir un caption corto que combine: "
+        "1) algo gracioso, absurdo o específico de la imagen "
+        "2) el vocabulario y humor exacto de los miembros del servidor. "
+        "El caption tiene que sonar como si uno de ellos lo hubiera escrito, "
+        "no como un chiste genérico de Facebook. "
+        "Sé irreverente, caótico, sin filtro. "
+        "Máximo 80 caracteres. Responde SOLO con el caption, nada más."
     )
     user_prompt = (
-        f"Image description: {image_description}\n\n"
-        f"Here are real messages from the server members "
-        f"(use their style and vocabulary):\n"
+        f"La imagen muestra: {image_description}\n\n"
+        f"Estos son mensajes REALES de los miembros del servidor "
+        f"(usa su vocabulario y humor):\n"
         f"{corpus_text}\n\n"
-        f"Write a meme caption for this image that sounds like these people wrote it. "
-        f"Maximum 80 characters. Only the caption, nothing else."
+        f"Escribe UN caption (máx 80 caracteres) que conecte algo de la imagen "
+        f"con cómo habla esta gente. Que dé risa. Solo el caption."
     )
 
     try:
@@ -568,7 +573,7 @@ async def generate_groq_meme_caption(
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=60,
+            max_tokens=80,
             temperature=0.9,
         )
         caption = caption_response.choices[0].message.content.strip()
@@ -576,7 +581,10 @@ async def generate_groq_meme_caption(
         if len(caption) > 80:
             caption = caption[:80].rsplit(" ", 1)[0].strip()
         return caption if caption else None
-    except Exception:
+    except Exception as e:
+        if "429" in str(e) or "rate_limit" in str(e).lower():
+            log.warning("Groq rate limit alcanzado, fallback a Markov")
+            return None
         log.exception("Error en Groq Vision paso 2 (caption)")
         return None
 
@@ -590,12 +598,16 @@ async def auto_meme_task():
             if not channel or not isinstance(channel, discord.TextChannel):
                 continue
 
-            # Obtener imagen random del pool del server
-            image_url = await get_random_image_url(schedule["guild_id"])
+            # Obtener imagen random del pool del server (sin repetir la anterior)
+            guild_id = schedule["guild_id"]
+            last = _last_meme_image.get(guild_id)
+            image_url = await get_random_image_url_excluding(guild_id, exclude_url=last)
+            if image_url:
+                _last_meme_image[guild_id] = image_url
             if not image_url:
                 log.info(
                     "auto_meme: sin imágenes en pool para guild %s",
-                    schedule["guild_id"]
+                    guild_id
                 )
                 continue
 
@@ -617,14 +629,14 @@ async def auto_meme_task():
             if len(img_bytes) > _MEME_MAX_BYTES:
                 continue
 
-            # Obtener muestra de 100 mensajes random del corpus
+            # Obtener muestra del corpus
             corpus_sample = await get_corpus_messages_filtered(
-                schedule["guild_id"], min_words=5, limit=300
+                guild_id, min_words=5, limit=400
             )
             if not corpus_sample:
                 log.info(
                     "auto_meme: corpus vacío para guild %s",
-                    schedule["guild_id"]
+                    guild_id
                 )
                 continue
 
@@ -633,13 +645,13 @@ async def auto_meme_task():
                 caption = await generate_groq_meme_caption(img_bytes, corpus_sample)
             else:
                 # Fallback a Markov si no hay Groq configurado
-                model = await build_markov_model(schedule["guild_id"])
+                model = await build_markov_model(guild_id)
                 caption = await asyncio.to_thread(
                     _try_short_sentence, model
                 ) if model and not model.is_empty else None
 
             if not caption:
-                log.info("auto_meme: no se generó caption para guild %s", schedule["guild_id"])
+                log.info("auto_meme: no se generó caption para guild %s", guild_id)
                 continue
 
             # Renderizar y postear
@@ -648,7 +660,7 @@ async def auto_meme_task():
                 file=discord.File(io.BytesIO(meme_bytes), filename="meme.png")
             )
             await update_meme_last_posted(
-                schedule["guild_id"], schedule["channel_id"]
+                guild_id, schedule["channel_id"]
             )
             log.info(
                 "auto_meme: meme posteado en canal %s con caption: %s",
@@ -1004,6 +1016,18 @@ async def refeed_all_slash(interaction: discord.Interaction):
                             await save_gif_url(interaction.guild.id, url)
                         except Exception:
                             log.exception("Error procesando GIF adjunto en refeed_all: %s", attachment.url)
+
+                for attachment in msg.attachments:
+                    ext = os.path.splitext(attachment.filename.lower())[1]
+                    if ext in {".png", ".jpg", ".jpeg", ".webp"} \
+                            and attachment.size <= _MEME_MAX_BYTES:
+                        try:
+                            await save_image_url(interaction.guild.id, attachment.url)
+                        except Exception:
+                            log.exception(
+                                "Error guardando imagen en refeed_all: %s",
+                                attachment.url
+                            )
 
                 cleaned = clean_for_corpus(msg.content or "")
                 if cleaned is None:
@@ -1451,8 +1475,20 @@ async def meme_auto_lista(interaction: discord.Interaction):
 bot.tree.add_command(_meme_auto)
 
 
-@bot.tree.command(name="meme_test", description="Genera un meme ahora mismo (test).")
-async def meme_test_slash(interaction: discord.Interaction):
+@bot.tree.command(name="momo", description="Genera un meme del server.")
+async def momo_slash(interaction: discord.Interaction):
+    import time
+    now = time.time()
+    last = _momo_cooldowns.get(interaction.user.id, 0)
+    if now - last < 45:
+        remaining = int(45 - (now - last))
+        await interaction.response.send_message(
+            f"espera {remaining}s antes de generar otro meme",
+            ephemeral=True
+        )
+        return
+    _momo_cooldowns[interaction.user.id] = now
+
     await interaction.response.defer()
 
     if not interaction.guild:
@@ -1460,7 +1496,11 @@ async def meme_test_slash(interaction: discord.Interaction):
         return
 
     try:
-        image_url = await get_random_image_url(interaction.guild.id)
+        guild_id = interaction.guild.id
+        last_img = _last_meme_image.get(guild_id)
+        image_url = await get_random_image_url_excluding(guild_id, exclude_url=last_img)
+        if image_url:
+            _last_meme_image[guild_id] = image_url
         if not image_url:
             await interaction.followup.send(
                 "Sin imágenes en el pool todavía. Sube algunas fotos al server primero.",
@@ -1475,7 +1515,7 @@ async def meme_test_slash(interaction: discord.Interaction):
                 return
             img_bytes = img_resp.content
         except Exception:
-            log.exception("meme_test: error descargando imagen %s", image_url)
+            log.exception("momo: error descargando imagen %s", image_url)
             await interaction.followup.send("No se pudo descargar la imagen.", ephemeral=True)
             return
 
@@ -1483,14 +1523,14 @@ async def meme_test_slash(interaction: discord.Interaction):
             await interaction.followup.send("La imagen pesa mucho.", ephemeral=True)
             return
 
-        corpus_sample = await get_corpus_messages_filtered(interaction.guild.id, min_words=5, limit=300)
+        corpus_sample = await get_corpus_messages_filtered(guild_id, min_words=5, limit=400)
         if not corpus_sample:
             await interaction.followup.send("El corpus está vacío.", ephemeral=True)
             return
 
         caption = await generate_groq_meme_caption(img_bytes, corpus_sample)
         if caption is None:
-            model = await build_markov_model(interaction.guild.id)
+            model = await build_markov_model(guild_id)
             caption = await asyncio.to_thread(
                 _try_short_sentence, model
             ) if model and not model.is_empty else None
@@ -1505,7 +1545,7 @@ async def meme_test_slash(interaction: discord.Interaction):
         )
 
     except Exception:
-        log.exception("meme_test: error inesperado")
+        log.exception("momo: error inesperado")
         await interaction.followup.send("se rompió algo, revisa los logs.", ephemeral=True)
 
 

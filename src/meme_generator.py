@@ -22,7 +22,7 @@ def _try_short_sentence(model, max_chars: int = 80, tries: int = 100) -> str | N
     return None
 
 
-def render_meme(image_bytes: bytes, caption: str) -> bytes:
+def render_caption(image_bytes: bytes, caption: str) -> bytes:
     base = Image.open(io.BytesIO(image_bytes))
     if hasattr(base, "n_frames") and base.n_frames > 1:
         base.seek(0)
@@ -84,5 +84,96 @@ def render_meme(image_bytes: bytes, caption: str) -> bytes:
 
     buf = io.BytesIO()
     out.save(buf, format="PNG")
+    buf.seek(0)
+    return buf.getvalue()
+
+
+import random as _random
+_LAYOUTS = ["top", "bottom", "top_bottom"]
+
+
+def render_meme(image_bytes: bytes, caption: str) -> bytes:
+    import unicodedata
+    base = Image.open(io.BytesIO(image_bytes))
+    if hasattr(base, "n_frames") and base.n_frames > 1:
+        base.seek(0)
+    base = base.convert("RGB")
+    img_w, img_h = base.size
+
+    text = caption.upper()
+    text = unicodedata.normalize('NFKD', text)
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    text = re.sub(r'\s+', ' ', text).strip()
+    if not text:
+        return image_bytes
+
+    layout = _random.choice(_LAYOUTS)
+    words = text.split()
+    if layout == "top_bottom" and len(words) >= 4:
+        mid = len(words) // 2
+        top_text = " ".join(words[:mid])
+        bottom_text = " ".join(words[mid:])
+    elif layout == "top":
+        top_text = text
+        bottom_text = None
+    else:
+        top_text = None
+        bottom_text = text
+
+    draw = ImageDraw.Draw(base)
+
+    def draw_outlined_text(txt: str, position: str):
+        if not txt:
+            return
+        padding_h = int(img_w * 0.05)
+        usable_w = img_w - 2 * padding_h
+        font_size = max(28, img_w // 10)
+        font = None
+        lines = []
+        while font_size >= 18:
+            f = ImageFont.truetype(_FONT_PATH, font_size)
+            avg_char_w = max(1, f.getlength("A"))
+            chars_per_line = max(1, int(usable_w / avg_char_w))
+            wrapped = textwrap.wrap(txt, width=chars_per_line) or [txt[:chars_per_line]]
+            if all(f.getlength(l) <= usable_w for l in wrapped):
+                font = f
+                lines = wrapped
+                break
+            font_size -= 2
+        if font is None:
+            font_size = 18
+            font = ImageFont.truetype(_FONT_PATH, font_size)
+            avg_char_w = max(1, font.getlength("A"))
+            chars_per_line = max(1, int(usable_w / avg_char_w))
+            lines = textwrap.wrap(txt, width=chars_per_line) or [txt]
+
+        ascent, descent = font.getmetrics()
+        line_h = ascent + descent
+        total_h = len(lines) * line_h
+        margin = int(img_h * 0.03)
+
+        if position == "top":
+            y = margin
+        else:
+            y = img_h - total_h - margin
+
+        outline = max(2, font_size // 12)
+
+        for line in lines:
+            line_w = font.getlength(line)
+            x = int((img_w - line_w) / 2)
+            for dx in range(-outline, outline + 1):
+                for dy in range(-outline, outline + 1):
+                    if dx == 0 and dy == 0:
+                        continue
+                    draw.text((x + dx, y + dy), line, fill=(0, 0, 0), font=font)
+            draw.text((x, y), line, fill=(255, 255, 255), font=font)
+            y += line_h
+
+    draw_outlined_text(top_text, "top")
+    draw_outlined_text(bottom_text, "bottom")
+
+    buf = io.BytesIO()
+    base.save(buf, format="PNG")
     buf.seek(0)
     return buf.getvalue()
