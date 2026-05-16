@@ -546,15 +546,14 @@ async def generate_groq_meme_caption(
     # Paso 2: generar caption con contexto del server
     corpus_text = "\n".join(f"- {msg}" for msg in corpus_sample[:100])
     system_prompt = (
-        "You are a meme caption generator for a specific Discord server. "
-        "Your ONLY job is to write a short caption that sounds EXACTLY like "
-        "the real members of this server — their vocabulary, their jokes, "
-        "their expressions, their humor. "
-        "The image is just a trigger, not the subject. "
-        "Do NOT describe what you see in the image. "
-        "Do NOT write ironic observations about the image. "
-        "DO steal words, phrases and energy directly from the sample messages. "
-        "The caption must feel like something a member typed, not an AI caption. "
+        "You are a meme caption generator for a Discord server. "
+        "Write a short caption that COMBINES two things: "
+        "1) what is happening in the image "
+        "2) the vocabulary, humor and expressions of the server members. "
+        "The caption must reference something visible in the image "
+        "BUT sound like it was written by the server members. "
+        "Do NOT just describe the image. Do NOT ignore the image completely. "
+        "Find the funny connection between what you see and how these people talk. "
         "Be unfiltered, irreverent, chaotic. "
         "Maximum 80 characters. Respond with ONLY the caption. "
         "No quotes, no explanation, nothing else."
