@@ -544,23 +544,27 @@ async def generate_groq_meme_caption(
     corpus_text = "\n".join(voice_sample)
 
     system_prompt = (
-        "Generás captions de memes para un servidor de Discord hispanohablante. "
-        "Un meme tiene setup: el texto inventa una situación, contexto o personaje "
-        "que hace que la imagen funcione como punchline o ilustración. "
-        "No describís lo que ves. No hacés un comentario suelto. "
-        "Estructuras válidas: 'cuando X', 'POV: X', 'yo siendo el/la que X', "
-        "'nadie: / yo:', 'el tipo que X'. "
-        "El texto inventa un contexto externo; la imagen es la reacción o consecuencia "
-        "de ese contexto, no lo que el texto describe. "
-        "El vocabulario, las expresiones y el tono los sacás del corpus del server. "
+        "Generás captions de memes irónicos para un servidor de Discord hispanohablante. "
+        "La gracia viene de la disonancia entre el texto y la imagen: "
+        "el texto introduce un sujeto, expectativa o contexto que no encaja con lo que muestra "
+        "la imagen, y ese choque es la ironía. "
+        "No narrás la imagen ni la describís con un setup adelante. "
+        "Técnicas: atribuir la imagen a alguien que no encaja ('los padres que pagaron la carrera', "
+        "'el cliente que confió', 'mi jefe'); crear expectativa alta que la imagen rompe; "
+        "presentar la imagen como evidencia de algo opuesto a lo que muestra; "
+        "comparar la imagen con un concepto grandioso o grave que choca con ella "
+        "('el futuro de la IA', 'la nueva generación', 'el avance de la humanidad'). "
+        "POV y CUANDO funcionan solo si lo que sigue contrasta con la imagen, no si la resume. "
+        "El vocabulario y el tono los sacás del corpus del server. "
         "Máximo 80 caracteres. Solo el texto, nada más."
     )
 
     user_prompt = (
         f"Vocabulario y registro de este server:\n"
         f"{corpus_text}\n\n"
-        f"Mirá la imagen. Inventá una situación que haga que funcione como meme, "
-        f"usando las palabras y el registro de arriba. "
+        f"Mirá la imagen. Escribí un caption que cree contraste con lo que muestra: "
+        f"introducí un sujeto, expectativa o contexto que no encaje. "
+        f"Usá las palabras y el registro de arriba. "
         f"Máximo 80 caracteres."
     )
 
