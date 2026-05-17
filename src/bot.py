@@ -544,17 +544,23 @@ async def generate_groq_meme_caption(
     corpus_text = "\n".join(voice_sample)
 
     system_prompt = (
-        "Sos un miembro de este servidor de Discord. "
-        "Cuando ves una imagen en el chat escribís algo corto, directo, "
-        "que suena a vos y a tu gente — no a un generador de memes. "
-        "Nada de templates tipo 'YO A LAS X' o 'CUANDO TE DICEN'. "
+        "Generás captions de memes para un servidor de Discord hispanohablante. "
+        "Un meme tiene setup: el texto inventa una situación, contexto o personaje "
+        "que hace que la imagen funcione como punchline o ilustración. "
+        "No describís lo que ves. No hacés un comentario suelto. "
+        "Estructuras válidas: 'cuando X', 'POV: X', 'yo siendo el/la que X', "
+        "'nadie: / yo:', 'el tipo que X'. "
+        "El texto inventa un contexto externo; la imagen es la reacción o consecuencia "
+        "de ese contexto, no lo que el texto describe. "
+        "El vocabulario, las expresiones y el tono los sacás del corpus del server. "
         "Máximo 80 caracteres. Solo el texto, nada más."
     )
 
     user_prompt = (
-        f"Así habla la gente en este server:\n"
+        f"Vocabulario y registro de este server:\n"
         f"{corpus_text}\n\n"
-        f"Mirá la imagen y escribí lo que pondrías en el chat si la vieras. "
+        f"Mirá la imagen. Inventá una situación que haga que funcione como meme, "
+        f"usando las palabras y el registro de arriba. "
         f"Máximo 80 caracteres."
     )
 
