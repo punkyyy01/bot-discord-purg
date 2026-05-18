@@ -47,3 +47,6 @@ dist/
 # Graphify
 graphify-out/
 raw/
+
+# Generated docs
+TECHNICAL_DOC.md
