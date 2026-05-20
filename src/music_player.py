@@ -17,6 +17,7 @@ EMBED_COLOR = 0x8B00FF
 
 YTDL_OPTS = {
     'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+    'cookiefile': '/opt/bot-discord-purg/cookies.txt',
     'noplaylist': True,
     'nocheckcertificate': True,
     'ignoreerrors': False,
@@ -51,13 +52,6 @@ def _is_youtube_info(info: dict) -> bool:
 def _build_ytdl_opts() -> dict:
     opts = dict(YTDL_OPTS)
     opts['cookiefile'] = '/opt/bot-discord-purg/cookies.txt'
-    cookiefile = os.getenv("YTDL_COOKIES_FILE")
-    if cookiefile:
-        opts['cookiefile'] = cookiefile
-    cookies_from_browser = os.getenv("YTDL_COOKIES_FROM_BROWSER")
-    if cookies_from_browser:
-        parts = cookies_from_browser.split(":", 1)
-        opts['cookiesfrombrowser'] = tuple(parts) if len(parts) > 1 else parts[0]
     return opts
 
 
