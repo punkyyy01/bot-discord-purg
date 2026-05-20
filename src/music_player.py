@@ -22,7 +22,7 @@ YTDL_OPTS = {
     'ignoreerrors': False,
     'quiet': True,
     'no_warnings': True,
-    'default_search': 'scsearch',
+    'default_search': 'ytsearch',
     'source_address': '0.0.0.0',
 }
 
@@ -64,20 +64,16 @@ def _build_ytdl_opts() -> dict:
 def _resolve_query(query: str) -> str:
     """
     Returns the effective query to pass to yt-dlp:
-    - YouTube URLs  → raises YouTubeNotAllowed
+    - YouTube URLs  → returned as-is
     - Other URLs    → returned as-is
-    - Plain text    → SoundCloud web search URL
+    - Plain text    → YouTube search query
     """
     q = query.strip()
     if _YT_RE.match(q):
-        raise YouTubeNotAllowed(
-            "YouTube no está disponible desde este servidor. "
-            "Usa el nombre de la canción/artista (busca en SoundCloud) "
-            "o una URL directa de SoundCloud."
-        )
+        return q
     if _URL_RE.match(q):
         return q
-    return f"https://soundcloud.com/search/sounds?q={urllib.parse.quote(q)}"
+    return f"ytsearch:{q}"
 
 FFMPEG_OPTS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
@@ -136,8 +132,6 @@ async def fetch_song(query: str) -> Optional[SongInfo]:
         try:
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(effective, download=False)
-                if not info and not _URL_RE.match(effective):
-                    info = ydl.extract_info(f"scsearch:{query}", download=False)
                 if not info:
                     return None
                 if 'entries' in info:
@@ -168,12 +162,10 @@ async def fetch_song(query: str) -> Optional[SongInfo]:
                     "❌ YouTube bloqueó la request. Las cookies pueden haber expirado — contacta al admin del bot."
                 ) from e
             if "soundcloud" in msg.lower() and "404" in msg:
-                if _URL_RE.match(effective) and "soundcloud.com/search/sounds" in effective:
-                    try:
-                        with yt_dlp.YoutubeDL(opts) as ydl:
-                            return ydl.extract_info(f"scsearch:{query}", download=False)
-                    except Exception:
-                        pass
+                if _URL_RE.match(effective) and "soundcloud.com" in effective:
+                    raise MediaFetchError(
+                        "SoundCloud respondio 404. La pista puede estar privada o eliminada."
+                    ) from e
                 raise MediaFetchError(
                     "SoundCloud respondio 404. La pista puede estar privada o eliminada."
                 ) from e
