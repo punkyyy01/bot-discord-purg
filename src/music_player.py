@@ -15,17 +15,17 @@ log = logging.getLogger(__name__)
 
 EMBED_COLOR = 0x8B00FF
 
+_COOKIES_PATH = '/opt/bot-discord-purg/cookies.txt'
+
 YTDL_OPTS = {
     'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
-    'cookiefile': '/opt/bot-discord-purg/cookies.txt',
     'noplaylist': True,
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'quiet': True,
     'no_warnings': False,
-    'default_search': 'ytsearch',
+    'default_search': 'scsearch',
     'source_address': '0.0.0.0',
-    # Use iOS/Android clients to bypass JS n-challenge (no Node.js required)
     'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
 }
 
@@ -53,23 +53,18 @@ def _is_youtube_info(info: dict) -> bool:
 
 def _build_ytdl_opts() -> dict:
     opts = dict(YTDL_OPTS)
-    opts['cookiefile'] = '/opt/bot-discord-purg/cookies.txt'
+    if os.path.isfile(_COOKIES_PATH):
+        opts['cookiefile'] = _COOKIES_PATH
     return opts
 
 
 def _resolve_query(query: str) -> str:
-    """
-    Returns the effective query to pass to yt-dlp:
-    - YouTube URLs  → returned as-is
-    - Other URLs    → returned as-is
-    - Plain text    → YouTube search query
-    """
     q = query.strip()
     if _YT_RE.match(q):
         return q
     if _URL_RE.match(q):
         return q
-    return f"ytsearch:{q}"
+    return f"scsearch:{q}"
 
 FFMPEG_OPTS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
