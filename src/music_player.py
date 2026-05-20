@@ -25,6 +25,8 @@ YTDL_OPTS = {
     'no_warnings': False,
     'default_search': 'ytsearch',
     'source_address': '0.0.0.0',
+    # Use iOS/Android clients to bypass JS n-challenge (no Node.js required)
+    'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
 }
 
 _YT_RE = re.compile(
