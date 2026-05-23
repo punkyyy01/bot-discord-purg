@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import time
-import urllib.parse
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -15,19 +14,7 @@ log = logging.getLogger(__name__)
 
 EMBED_COLOR = 0x8B00FF
 
-_COOKIES_PATH = '/opt/bot-discord-purg/cookies.txt'
-
-YTDL_OPTS = {
-    'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'quiet': True,
-    'no_warnings': False,
-    'default_search': 'scsearch',
-    'source_address': '0.0.0.0',
-    'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
-}
+COOKIES_FILE = os.getenv("YTDLP_COOKIES", "/opt/bot-discord-purg/cookies.txt")
 
 _YT_RE = re.compile(
     r'^https?://(?:www\.|m\.|music\.)?(?:youtube\.com/|youtu\.be/)',
@@ -51,20 +38,76 @@ def _is_youtube_info(info: dict) -> bool:
     return 'youtube' in extractor
 
 
-def _build_ytdl_opts() -> dict:
-    opts = dict(YTDL_OPTS)
-    if os.path.isfile(_COOKIES_PATH):
-        opts['cookiefile'] = _COOKIES_PATH
+def _cookies_available() -> bool:
+    return bool(COOKIES_FILE) and os.path.isfile(COOKIES_FILE)
+
+
+def _common_opts() -> dict:
+    return {
+        'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+        'noplaylist': True,
+        'nocheckcertificate': True,
+        'quiet': True,
+        'no_warnings': True,
+        'skip_download': True,
+        'source_address': '0.0.0.0',
+    }
+
+
+def _soundcloud_flat_opts() -> dict:
+    return {
+        **_common_opts(),
+        'extract_flat': 'in_playlist',
+        'default_search': 'scsearch',
+        'ignoreerrors': True,
+    }
+
+
+def _soundcloud_strict_opts() -> dict:
+    return {
+        **_common_opts(),
+        'default_search': 'scsearch',
+        'ignoreerrors': False,
+    }
+
+
+def _youtube_flat_opts() -> dict:
+    opts = {
+        **_common_opts(),
+        'extract_flat': 'in_playlist',
+        'default_search': 'ytsearch',
+        'ignoreerrors': True,
+        'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
+    }
+    if _cookies_available():
+        opts['cookiefile'] = COOKIES_FILE
     return opts
 
 
-def _resolve_query(query: str) -> str:
-    q = query.strip()
-    if _YT_RE.match(q):
-        return q
-    if _URL_RE.match(q):
-        return q
-    return f"scsearch:{q}"
+def _youtube_strict_opts() -> dict:
+    opts = {
+        **_common_opts(),
+        'default_search': 'ytsearch',
+        'ignoreerrors': False,
+        'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
+    }
+    if _cookies_available():
+        opts['cookiefile'] = COOKIES_FILE
+    return opts
+
+
+def _generic_strict_opts() -> dict:
+    return {
+        **_common_opts(),
+        'ignoreerrors': False,
+    }
+
+
+def _opts_for_url(url: str) -> dict:
+    if _YT_RE.match(url):
+        return _youtube_strict_opts()
+    return _generic_strict_opts()
+
 
 FFMPEG_OPTS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
@@ -114,106 +157,226 @@ def progress_bar(elapsed: int, total: int, width: int = 12) -> str:
     return "▓" * filled + "░" * (width - filled) + f" {fmt_duration(clamped)} / {fmt_duration(total)}"
 
 
-async def fetch_song(query: str) -> Optional[SongInfo]:
-    """Extract song metadata (no stream URL) for a search query or URL."""
-    effective = _resolve_query(query)  # raises YouTubeNotAllowed if needed
-
-    def _extract():
-        opts = {**_build_ytdl_opts(), 'skip_download': True}
-        try:
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                info = ydl.extract_info(effective, download=False)
-                if not info:
-                    return None
-                if 'entries' in info:
-                    entries = [e for e in info['entries'] if e]
-                    if not entries:
-                        return None
-                    info = None
-                    for entry in entries:
-                        url = entry.get('url') or entry.get('webpage_url')
-                        if not url:
-                            continue
-                        try:
-                            candidate = ydl.extract_info(url, download=False)
-                        except yt_dlp.utils.DownloadError:
-                            continue
-                        except yt_dlp.utils.ExtractorError:
-                            continue
-                        if candidate and candidate.get('title'):
-                            info = candidate
-                            break
-                    if not info:
-                        return None
-                return info
-        except yt_dlp.utils.DownloadError as e:
-            msg = str(e)
-            if "Sign in" in msg or "bot" in msg.lower():
-                raise MediaFetchError(
-                    "❌ YouTube bloqueó la request. Las cookies pueden haber expirado — contacta al admin del bot."
-                ) from e
-            if "soundcloud" in msg.lower() and "404" in msg:
-                if _URL_RE.match(effective) and "soundcloud.com" in effective:
-                    raise MediaFetchError(
-                        "SoundCloud respondio 404. La pista puede estar privada o eliminada."
-                    ) from e
-                raise MediaFetchError(
-                    "SoundCloud respondio 404. La pista puede estar privada o eliminada."
-                ) from e
-            raise MediaFetchError("No se pudo obtener la informacion de esa URL.") from e
-        except yt_dlp.utils.ExtractorError as e:
-            msg = str(e)
-            if "soundcloud" in msg.lower() and "404" in msg:
-                raise MediaFetchError(
-                    "SoundCloud respondio 404. La pista puede estar privada o eliminada."
-                ) from e
-            raise MediaFetchError("No se pudo obtener la informacion de esa URL.") from e
-
-    loop = asyncio.get_running_loop()
-    info = await loop.run_in_executor(None, _extract)
-    if not info:
-        return None
-    if _is_youtube_info(info):
-        raise YouTubeNotAllowed(
-            "YouTube no esta disponible desde este servidor. "
-            "Usa SoundCloud o configura cookies para yt-dlp."
-        )
+def _song_from_info(info: dict, fallback_url: str) -> SongInfo:
     return SongInfo(
-        title=info.get('title', 'Desconocido'),
-        webpage_url=info.get('webpage_url') or info.get('url', query),
+        title=info.get('title') or 'Desconocido',
+        webpage_url=info.get('webpage_url') or info.get('url') or fallback_url,
         duration=int(info.get('duration') or 0),
         thumbnail=info.get('thumbnail'),
         requester=None,
     )
 
 
+def _candidate_url(entry: dict) -> Optional[str]:
+    return entry.get('webpage_url') or entry.get('url')
+
+
+def _flat_search(query: str, opts: dict) -> list[dict]:
+    with yt_dlp.YoutubeDL(opts) as ydl:
+        info = ydl.extract_info(query, download=False)
+    if not info:
+        return []
+    entries = info.get('entries')
+    if entries is not None:
+        return [e for e in entries if e]
+    return [info]
+
+
+def _extract_full(url: str, opts: dict) -> Optional[dict]:
+    with yt_dlp.YoutubeDL(opts) as ydl:
+        return ydl.extract_info(url, download=False)
+
+
+def _friendly_message(url_or_query: str, err: Exception) -> str:
+    msg = str(err)
+    low = msg.lower()
+    if 'sign in' in low or "confirm you're not a bot" in low or "confirm you're not a robot" in low:
+        return (
+            "YouTube bloqueó la request. Las cookies pueden haber expirado — "
+            "contacta al admin del bot."
+        )
+    if 'soundcloud' in low and '404' in low:
+        return (
+            "SoundCloud devolvió 404 para esa pista. Puede estar privada, eliminada "
+            "o protegida con DRM (Go+) y no se puede reproducir."
+        )
+    if '404' in low:
+        return "El servidor respondió 404. La pista puede estar privada o eliminada."
+    return "No se pudo obtener la información de esa URL."
+
+
+def _resolve_soundcloud_search(query: str) -> Optional[SongInfo]:
+    """Multi-candidate SoundCloud search. Skips DRM-blocked tracks individually."""
+    try:
+        candidates = _flat_search(f"scsearch10:{query}", _soundcloud_flat_opts())
+    except Exception as e:  # noqa: BLE001 — flat search is best-effort
+        log.warning("soundcloud: búsqueda flat falló: %s", e)
+        return None
+
+    if not candidates:
+        log.info("soundcloud: sin candidatos para '%s'", query)
+        return None
+
+    strict_opts = _soundcloud_strict_opts()
+    for idx, entry in enumerate(candidates, start=1):
+        url = _candidate_url(entry)
+        if not url:
+            continue
+        hint = entry.get('title') or url
+        try:
+            info = _extract_full(url, strict_opts)
+        except yt_dlp.utils.DownloadError as e:
+            log.info("soundcloud: candidato %d (%s) descartado: %s", idx, hint, e)
+            continue
+        except yt_dlp.utils.ExtractorError as e:
+            log.info("soundcloud: candidato %d (%s) error extractor: %s", idx, hint, e)
+            continue
+        if not info:
+            continue
+        log.info("soundcloud: candidato %d (%s) reproducible", idx, hint)
+        return _song_from_info(info, url)
+
+    log.info("soundcloud: %d candidatos agotados sin éxito para '%s'", len(candidates), query)
+    return None
+
+
+def _resolve_youtube_search(query: str) -> Optional[SongInfo]:
+    """Multi-candidate YouTube search. Skipped entirely if cookies are not configured."""
+    if not _cookies_available():
+        log.info("youtube: cookies no encontradas en %s, fuente desactivada", COOKIES_FILE)
+        return None
+
+    try:
+        candidates = _flat_search(f"ytsearch5:{query}", _youtube_flat_opts())
+    except Exception as e:  # noqa: BLE001
+        log.warning("youtube: búsqueda flat falló: %s", e)
+        return None
+
+    if not candidates:
+        log.info("youtube: sin candidatos para '%s'", query)
+        return None
+
+    strict_opts = _youtube_strict_opts()
+    for idx, entry in enumerate(candidates, start=1):
+        url = _candidate_url(entry)
+        if not url:
+            continue
+        hint = entry.get('title') or url
+        try:
+            info = _extract_full(url, strict_opts)
+        except yt_dlp.utils.DownloadError as e:
+            log.info("youtube: candidato %d (%s) descartado: %s", idx, hint, e)
+            continue
+        except yt_dlp.utils.ExtractorError as e:
+            log.info("youtube: candidato %d (%s) error extractor: %s", idx, hint, e)
+            continue
+        if not info:
+            continue
+        log.info("youtube: candidato %d (%s) reproducible", idx, hint)
+        return _song_from_info(info, url)
+
+    log.info("youtube: %d candidatos agotados sin éxito para '%s'", len(candidates), query)
+    return None
+
+
+def _resolve_direct_url(url: str) -> SongInfo:
+    """Extract metadata for a direct URL. Raises MediaFetchError on failure, or
+    YouTubeNotAllowed for YouTube URLs without cookies configured."""
+    if _YT_RE.match(url) and not _cookies_available():
+        raise YouTubeNotAllowed(
+            "YouTube no está disponible desde este servidor. "
+            "Usa SoundCloud o configura cookies para yt-dlp."
+        )
+
+    opts = _opts_for_url(url)
+    try:
+        info = _extract_full(url, opts)
+    except yt_dlp.utils.DownloadError as e:
+        log.warning("URL directa %s falló: %s", url, e)
+        raise MediaFetchError(_friendly_message(url, e)) from e
+    except yt_dlp.utils.ExtractorError as e:
+        log.warning("URL directa %s error extractor: %s", url, e)
+        raise MediaFetchError(_friendly_message(url, e)) from e
+
+    if not info:
+        raise MediaFetchError("No se pudo obtener la información de esa URL.")
+    if 'entries' in info:
+        entries = [e for e in info['entries'] if e]
+        if not entries:
+            raise MediaFetchError("No se pudo obtener la información de esa URL.")
+        info = entries[0]
+
+    if _is_youtube_info(info) and not _cookies_available():
+        raise YouTubeNotAllowed(
+            "YouTube no está disponible desde este servidor. "
+            "Usa SoundCloud o configura cookies para yt-dlp."
+        )
+
+    return _song_from_info(info, url)
+
+
+async def fetch_song(query: str) -> Optional[SongInfo]:
+    """Extract song metadata for a search query or URL.
+
+    For URLs: extract directly (no fallback — a direct URL is a deliberate choice).
+    For text: chain SoundCloud (multi-candidate, skipping DRM tracks) → YouTube
+    (only if cookies are configured).
+    """
+    q = query.strip()
+    loop = asyncio.get_running_loop()
+
+    if _URL_RE.match(q):
+        return await loop.run_in_executor(None, _resolve_direct_url, q)
+
+    def _resolve_chain() -> Optional[SongInfo]:
+        song = _resolve_soundcloud_search(q)
+        if song:
+            return song
+        return _resolve_youtube_search(q)
+
+    song = await loop.run_in_executor(None, _resolve_chain)
+    if song:
+        return song
+
+    raise MediaFetchError(
+        f"No encontré una versión reproducible de '{q}' en ninguna fuente."
+    )
+
+
 async def fetch_stream_url(webpage_url: str) -> Optional[str]:
-    """Get a fresh direct audio stream URL just before playing."""
-    def _extract():
-        opts = {**_build_ytdl_opts(), 'skip_download': True}
+    """Re-extract a fresh direct audio stream URL just before playing.
+
+    Returns None on any failure (DRM detected late, expired URL, network blip) so
+    MusicPlayer can skip this track and advance to the next one in the queue
+    instead of crashing.
+    """
+    def _extract() -> Optional[str]:
+        opts = _opts_for_url(webpage_url)
         try:
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(webpage_url, download=False)
-                if not info:
-                    return None
-                if 'entries' in info:
-                    entries = [e for e in info['entries'] if e]
-                    info = entries[0] if entries else None
-                if not info:
-                    return None
-                if _is_youtube_info(info):
-                    return None
-                formats = info.get('formats', [])
-                audio_only = [f for f in formats if f.get('acodec') != 'none' and f.get('vcodec') == 'none']
-                if audio_only:
-                    return audio_only[-1].get('url')
-                return info.get('url')
         except yt_dlp.utils.DownloadError as e:
-            log.warning("yt-dlp DownloadError en stream: %s", e)
+            log.warning("fetch_stream_url: DownloadError para %s: %s", webpage_url, e)
             return None
         except yt_dlp.utils.ExtractorError as e:
-            log.warning("yt-dlp ExtractorError en stream: %s", e)
+            log.warning("fetch_stream_url: ExtractorError para %s: %s", webpage_url, e)
             return None
+
+        if not info:
+            return None
+        if 'entries' in info:
+            entries = [e for e in info['entries'] if e]
+            info = entries[0] if entries else None
+        if not info:
+            return None
+        if _is_youtube_info(info) and not _cookies_available():
+            log.warning("fetch_stream_url: info de YouTube sin cookies, no se puede reproducir")
+            return None
+        formats = info.get('formats', [])
+        audio_only = [f for f in formats if f.get('acodec') != 'none' and f.get('vcodec') == 'none']
+        if audio_only:
+            return audio_only[-1].get('url')
+        return info.get('url')
 
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _extract)

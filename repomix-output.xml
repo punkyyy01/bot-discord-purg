@@ -1,0 +1,3938 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+src/
+  __init__.py
+  bot.py
+  db.py
+  markov_engine.py
+  meme_generator.py
+  music_commands.py
+  music_player.py
+.env.example
+.gitignore
+cookies.txt
+Impact.ttf
+README.md
+requirements.txt
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/__init__.py">
+
+</file>
+
+<file path="cookies.txt">
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+.youtube.com	TRUE	/	TRUE	1792377624	__Secure-BUCKET	CJ0F
+.youtube.com	TRUE	/	TRUE	1792377625	LOGIN_INFO	AFmmF2swRAIgWxoraCk3Nn5wVA2k4HTcks-zgQNs_hhKFzeS0rXOmVwCID5mJM0BcvresckNVjC6L4C-w6VGFMSQNi8u4R-Le8yb:QUQ3MjNmdzBSd2lmc1V4eGVFWjhkbG9zdmxmNkt2NFNuQ0VWUUtaMG5ia0V1aWtobC1MZnV1RWFpQzBPdzBIZ0FvdWV5YzFaV3k1OVZvcUN4dHdIWnRBZGZ3LWNEcHdXek5Hd082dXhzTXlidzRHbS10Y1NnWTdxSGNULXdMd0RNV2d6MkVhNFRTNDVQdHJmY1ZUb0xTVFh1bFJkLXp5cUhB
+.youtube.com	TRUE	/	FALSE	1793741191	HSID	AuMe7CejxEdv0XAGN
+.youtube.com	TRUE	/	TRUE	1793741191	SSID	AvnEGNnIOCpDH5uMl
+.youtube.com	TRUE	/	FALSE	1793741191	APISID	-UKUVbUEWjJH9DMN/ADWnZ1SLAcF023FOw
+.youtube.com	TRUE	/	TRUE	1793741191	SAPISID	orPKSv05H_09XvKL/Afc5Njrbn0fbcP3TC
+.youtube.com	TRUE	/	TRUE	1793741191	__Secure-1PAPISID	orPKSv05H_09XvKL/Afc5Njrbn0fbcP3TC
+.youtube.com	TRUE	/	TRUE	1793741191	__Secure-3PAPISID	orPKSv05H_09XvKL/Afc5Njrbn0fbcP3TC
+.youtube.com	TRUE	/	FALSE	1793741191	SID	g.a0009wjr8EcZTZ3er2XGJpCG3ITN9xMsHifNjcckj6GJtScFVijzQFsYyGkAz2PYK8StoLIp5AACgYKAdkSARMSFQHGX2MiXvyyOVapTc6tu8HXDF_8rxoVAUF8yKrMJbVdjCAjxZiHWnNoUbXJ0076
+.youtube.com	TRUE	/	TRUE	1793741191	__Secure-1PSID	g.a0009wjr8EcZTZ3er2XGJpCG3ITN9xMsHifNjcckj6GJtScFVijzplaiwBoQam8jJWNKu_Yi1QACgYKAXgSARMSFQHGX2MinIX_vmfFl50yi69RGS59QRoVAUF8yKrotTpV7gNnrF_wGDry_6hg0076
+.youtube.com	TRUE	/	TRUE	1793741191	__Secure-3PSID	g.a0009wjr8EcZTZ3er2XGJpCG3ITN9xMsHifNjcckj6GJtScFVijz9DGMzdOzHdj-SXoPVPugcAACgYKAfQSARMSFQHGX2Mii6hIyJ6nEp5vTAbydBrEDRoVAUF8yKqAV5Enfg0mOSpo3UAsQa0B0076
+.youtube.com	TRUE	/	TRUE	1794796281	PREF	f6=40000080&f7=100&tz=America.Santiago
+.youtube.com	TRUE	/	TRUE	0	wide	1
+.youtube.com	TRUE	/	TRUE	1794796169	__Secure-1PSIDTS	sidts-CjQBhkeRd3u95rOU-5v8aPthCfrw6391WwpKplNPyGU-D3ffZXHhAFw8T9eM5WmYE-p4AwaHEAA
+.youtube.com	TRUE	/	TRUE	1794796169	__Secure-3PSIDTS	sidts-CjQBhkeRd3u95rOU-5v8aPthCfrw6391WwpKplNPyGU-D3ffZXHhAFw8T9eM5WmYE-p4AwaHEAA
+.youtube.com	TRUE	/	FALSE	1794796283	SIDCC	AKEyXzWNLUXnBBltBul8CexxwsdBQ7BLbFEcNOce2Zr4QdJjTYyGAFGFbzdxRtB-oFQQwDyeCoA
+.youtube.com	TRUE	/	TRUE	1794796283	__Secure-1PSIDCC	AKEyXzUiLu-_lhEoGtHRBLJ015y15M2DJOyioNuw-KFHp8O5TOfZ-Bk0Crdci7otGs3FLMrs7Bg
+.youtube.com	TRUE	/	TRUE	1794796283	__Secure-3PSIDCC	AKEyXzX0YvdmwUHcq-7qvqXiMSBUeuFmdXIOm5XMtFLi2dNo8RLJZQuhCiTRP9EIOPCafEsNRA
+.youtube.com	TRUE	/	TRUE	1794796279	VISITOR_INFO1_LIVE	INmLA8SdcdE
+.youtube.com	TRUE	/	TRUE	1794796279	VISITOR_PRIVACY_METADATA	CgJDTBIEGgAgLw%3D%3D
+.youtube.com	TRUE	/	TRUE	1794725251	__Secure-YNID	18.YT=RXJDO3IJ9DWs4jC6cd6E5eRIeMBHKFzlY_x6nDquv9bF8umxM6eLg2TobQehbZLLY8KIsplqdYhOUbv8UtW_KUIOB2prijOiX5fJkGT1OQ4rNRUIj_4eEMMyKpoqauo6fAxqtQPxMTmbvN19UMCY-yfV5wQpUbT2RlUt6Zhh66Cka72ciw3bGicEeJGptSwtWLI6orfxKtSi4BHc0Q6i6endbyskXF4iF8QDz4hYslvJxb_4HZFT2dWYRD8SmPPs_jvhP7YxR_e0YZjB1wcFwTgn9zuvLVBwNZaxfcgpHyo-Oc6vohuZA4yPWKCXku7BeBvHyXk0KYeFkC3JGI6cnw
+.youtube.com	TRUE	/	TRUE	1794725251	__Secure-ROLLOUT_TOKEN	CI-mzZuoy9OIgQEQ_oycobeAlAMY8JvU7ODElAM%3D
+.youtube.com	TRUE	/	TRUE	0	YSC	3ehH9USOPFw
+</file>
+
+<file path="src/markov_engine.py">
+import random
+from collections import defaultdict
+
+
+class SimpleMarkov:
+    """Generador de cadenas de Markov de primer orden estilo nimkov.
+
+    Diferencias clave con markovify:
+    - No valida estructura de "sentence"
+    - Termina naturalmente cuando la cadena alcanza fin-de-mensaje
+    - Las transiciones se pesan por frecuencia natural (lista con repetición)
+    """
+
+    START = "__START__"
+    END = "__END__"
+
+    def __init__(self):
+        self.transitions: dict[str, list[str]] = defaultdict(list)
+
+    def add(self, message: str) -> None:
+        words = message.lower().split()
+        if not words:
+            return
+        prev = self.START
+        for word in words:
+            self.transitions[prev].append(word)
+            prev = word
+        self.transitions[prev].append(self.END)
+
+    def add_many(self, messages: list[str]) -> None:
+        for msg in messages:
+            self.add(msg)
+
+    def generate(
+        self,
+        max_words: int = 30,
+        max_attempts: int = 5,
+        min_words: int = 1,
+    ) -> str | None:
+        if not self.transitions:
+            return None
+        for _ in range(max_attempts):
+            words: list[str] = []
+            current = self.START
+            for _ in range(max_words):
+                next_options = self.transitions.get(current)
+                if not next_options:
+                    break
+                next_word = random.choice(next_options)
+                if next_word == self.END:
+                    break
+                words.append(next_word)
+                current = next_word
+            if len(words) >= min_words:
+                return " ".join(words)
+        return None
+
+    @property
+    def is_empty(self) -> bool:
+        return not self.transitions
+</file>
+
+<file path="src/music_commands.py">
+import random
+
+import discord
+from discord import app_commands
+from discord.ext import commands
+
+from music_player import (
+    EMBED_COLOR, LoopMode, SongInfo, fmt_duration, progress_bar,
+    fetch_song, get_player, remove_player, MediaFetchError, YouTubeNotAllowed,
+)
+
+
+def _voice_check(interaction: discord.Interaction) -> tuple[discord.VoiceChannel | None, str | None]:
+    """Returns (voice_channel, error_msg). error_msg is None on success."""
+    if not interaction.guild:
+        return None, "Solo en servidores."
+
+    member = interaction.user
+    if not isinstance(member, discord.Member):
+        return None, "No puedo verificar tu canal de voz."
+
+    if not member.voice or not member.voice.channel:
+        return None, "Debes estar en un canal de voz."
+
+    vc = member.voice.channel
+    if not isinstance(vc, discord.VoiceChannel):
+        return None, "Debes estar en un canal de voz normal (no stage)."
+
+    perms = vc.permissions_for(interaction.guild.me)
+    if not perms.connect:
+        return None, f"No tengo permiso para conectarme a **{vc.name}**."
+    if not perms.speak:
+        return None, f"No tengo permiso para hablar en **{vc.name}**."
+
+    player = get_player(interaction.guild.id)
+    if player.voice_client and player.voice_client.is_connected():
+        if player.voice_client.channel.id != vc.id:
+            return None, f"Ya estoy en {player.voice_client.channel.mention}. Únete a ese canal."
+
+    return vc, None
+
+
+class NowPlayingView(discord.ui.View):
+    def __init__(self, guild_id: int):
+        super().__init__(timeout=120)
+        self.guild_id = guild_id
+
+    @discord.ui.button(emoji="⏸️", style=discord.ButtonStyle.secondary, custom_id="np_pause")
+    async def pause_resume(self, interaction: discord.Interaction, button: discord.ui.Button):
+        player = get_player(self.guild_id)
+        if not player.voice_client:
+            await interaction.response.send_message("❌ No hay nada reproduciéndose.", ephemeral=True)
+            return
+        if player.voice_client.is_paused():
+            player.voice_client.resume()
+            button.emoji = "⏸️"
+        elif player.voice_client.is_playing():
+            player.voice_client.pause()
+            button.emoji = "▶️"
+        else:
+            await interaction.response.send_message("❌ No hay nada reproduciéndose.", ephemeral=True)
+            return
+        await interaction.response.edit_message(view=self)
+
+    @discord.ui.button(emoji="⏭️", style=discord.ButtonStyle.secondary, custom_id="np_skip")
+    async def skip_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        player = get_player(self.guild_id)
+        if not player.voice_client or not player.is_active():
+            await interaction.response.send_message("❌ No hay nada reproduciéndose.", ephemeral=True)
+            return
+        player.voice_client.stop()
+        await interaction.response.send_message("⏭️ Canción saltada.", ephemeral=True)
+
+    @discord.ui.button(emoji="🔁", style=discord.ButtonStyle.secondary, custom_id="np_loop")
+    async def loop_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        player = get_player(self.guild_id)
+        player.loop_mode = player.loop_mode.next()
+        await interaction.response.send_message(f"🔁 {player.loop_mode.label()}", ephemeral=True)
+
+    @discord.ui.button(emoji="🔉", style=discord.ButtonStyle.secondary, custom_id="np_vol_down")
+    async def vol_down(self, interaction: discord.Interaction, button: discord.ui.Button):
+        player = get_player(self.guild_id)
+        player.volume = max(0.0, round(player.volume - 0.1, 2))
+        if player.voice_client and player.voice_client.source:
+            player.voice_client.source.volume = player.volume
+        await interaction.response.send_message(
+            f"🔉 Volumen: **{int(player.volume * 100)}%**", ephemeral=True
+        )
+
+    @discord.ui.button(emoji="🔊", style=discord.ButtonStyle.secondary, custom_id="np_vol_up")
+    async def vol_up(self, interaction: discord.Interaction, button: discord.ui.Button):
+        player = get_player(self.guild_id)
+        player.volume = min(1.0, round(player.volume + 0.1, 2))
+        if player.voice_client and player.voice_client.source:
+            player.voice_client.source.volume = player.volume
+        await interaction.response.send_message(
+            f"🔊 Volumen: **{int(player.volume * 100)}%**", ephemeral=True
+        )
+
+
+class QueueView(discord.ui.View):
+    PER_PAGE = 10
+
+    def __init__(self, songs: list[SongInfo], current: SongInfo | None, page: int = 0):
+        super().__init__(timeout=60)
+        self.songs = songs
+        self.current = current
+        self.page = page
+        self._sync_buttons()
+
+    def _max_page(self) -> int:
+        return max(0, (len(self.songs) - 1) // self.PER_PAGE) if self.songs else 0
+
+    def _sync_buttons(self):
+        for child in self.children:
+            if not isinstance(child, discord.ui.Button):
+                continue
+            label = child.label or ""
+            if "Anterior" in label:
+                child.disabled = self.page <= 0
+            elif "Siguiente" in label:
+                child.disabled = self.page >= self._max_page()
+
+    def build_embed(self) -> discord.Embed:
+        embed = discord.Embed(title="🎵 Cola de reproducción", color=EMBED_COLOR)
+        if self.current:
+            embed.add_field(
+                name="🎶 Reproduciendo ahora",
+                value=f"**{self.current.title}** ({fmt_duration(self.current.duration)})",
+                inline=False,
+            )
+        start = self.page * self.PER_PAGE
+        page_songs = self.songs[start:start + self.PER_PAGE]
+        if page_songs:
+            lines = [
+                f"`{start + i + 1}.` {s.title} · {fmt_duration(s.duration)}"
+                + (f" · {s.requester.display_name}" if s.requester else "")
+                for i, s in enumerate(page_songs)
+            ]
+            embed.add_field(
+                name=f"Próximas ({len(self.songs)} en cola)",
+                value="\n".join(lines),
+                inline=False,
+            )
+        else:
+            embed.add_field(name="Cola", value="Vacía", inline=False)
+
+        total = sum(s.duration for s in self.songs)
+        embed.set_footer(
+            text=f"Página {self.page + 1}/{self._max_page() + 1} · Total: {fmt_duration(total)}"
+        )
+        return embed
+
+    @discord.ui.button(label="◀ Anterior", style=discord.ButtonStyle.secondary)
+    async def prev_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.page = max(0, self.page - 1)
+        self._sync_buttons()
+        await interaction.response.edit_message(embed=self.build_embed(), view=self)
+
+    @discord.ui.button(label="Siguiente ▶", style=discord.ButtonStyle.secondary)
+    async def next_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.page = min(self._max_page(), self.page + 1)
+        self._sync_buttons()
+        await interaction.response.edit_message(embed=self.build_embed(), view=self)
+
+
+def register_music_commands(bot: commands.Bot) -> None:
+
+    @bot.tree.command(name="play", description="Reproduce una canción o URL. Si ya hay una, la agrega a la cola.")
+    @app_commands.describe(query="Nombre de la canción, artista, o URL de YouTube/SoundCloud")
+    async def play_slash(interaction: discord.Interaction, query: str):
+        vc, err = _voice_check(interaction)
+        if err:
+            await interaction.response.send_message(
+                embed=discord.Embed(description=f"❌ {err}", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.defer(thinking=True)
+
+        try:
+            song = await fetch_song(query)
+        except YouTubeNotAllowed as e:
+            await interaction.followup.send(
+                embed=discord.Embed(description=f"❌ {e}", color=EMBED_COLOR)
+            )
+            return
+        except MediaFetchError as e:
+            await interaction.followup.send(
+                embed=discord.Embed(description=f"❌ {e.user_message}", color=EMBED_COLOR)
+            )
+            return
+
+        if not song:
+            await interaction.followup.send(
+                embed=discord.Embed(
+                    description="❌ No se encontró ninguna canción para esa búsqueda.",
+                    color=EMBED_COLOR,
+                )
+            )
+            return
+
+        song.requester = interaction.user  # type: ignore[assignment]
+        player = get_player(interaction.guild.id)
+        started = await player.play(vc, song, interaction.channel)
+
+        if started:
+            embed = discord.Embed(
+                title="🎵 Reproduciendo ahora",
+                description=f"**[{song.title}]({song.webpage_url})**",
+                color=EMBED_COLOR,
+            )
+            embed.add_field(name="Duración", value=fmt_duration(song.duration), inline=True)
+            embed.add_field(name="Volumen", value=f"{int(player.volume * 100)}%", inline=True)
+            embed.set_footer(
+                text=f"Pedido por {interaction.user.display_name}",
+                icon_url=interaction.user.display_avatar.url,
+            )
+            if song.thumbnail:
+                embed.set_thumbnail(url=song.thumbnail)
+            await interaction.followup.send(
+                embed=embed, view=NowPlayingView(interaction.guild.id)
+            )
+        else:
+            pos = len(player.queue)
+            embed = discord.Embed(
+                title="📋 Agregado a la cola",
+                description=f"**[{song.title}]({song.webpage_url})**",
+                color=EMBED_COLOR,
+            )
+            embed.add_field(name="Posición en cola", value=f"#{pos}", inline=True)
+            embed.add_field(name="Duración", value=fmt_duration(song.duration), inline=True)
+            embed.set_footer(
+                text=f"Pedido por {interaction.user.display_name}",
+                icon_url=interaction.user.display_avatar.url,
+            )
+            if song.thumbnail:
+                embed.set_thumbnail(url=song.thumbnail)
+            await interaction.followup.send(embed=embed)
+
+    @bot.tree.command(name="skip", description="Salta a la siguiente canción en la cola.")
+    async def skip_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.is_active():
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ No hay nada reproduciéndose.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        player.voice_client.stop()
+        await interaction.response.send_message(
+            embed=discord.Embed(description="⏭️ Canción saltada.", color=EMBED_COLOR)
+        )
+
+    @bot.tree.command(name="stop", description="Detiene la reproducción, vacía la cola y el bot sale del canal.")
+    async def stop_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.voice_client:
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ El bot no está en ningún canal de voz.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        await player.cleanup()
+        remove_player(interaction.guild.id)
+        await interaction.response.send_message(
+            embed=discord.Embed(description="⏹️ Reproducción detenida y cola vaciada.", color=EMBED_COLOR)
+        )
+
+    @bot.tree.command(name="pause", description="Pausa la reproducción actual.")
+    async def pause_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.voice_client or not player.voice_client.is_playing():
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ No hay nada reproduciéndose.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        player.voice_client.pause()
+        await interaction.response.send_message(
+            embed=discord.Embed(description="⏸️ Reproducción pausada.", color=EMBED_COLOR)
+        )
+
+    @bot.tree.command(name="resume", description="Reanuda la reproducción pausada.")
+    async def resume_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.voice_client or not player.voice_client.is_paused():
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ La reproducción no está pausada.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        player.voice_client.resume()
+        await interaction.response.send_message(
+            embed=discord.Embed(description="▶️ Reproducción reanudada.", color=EMBED_COLOR)
+        )
+
+    @bot.tree.command(name="queue", description="Muestra la cola de reproducción actual.")
+    async def queue_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        view = QueueView(list(player.queue), player.current)
+        await interaction.response.send_message(embed=view.build_embed(), view=view)
+
+    @bot.tree.command(name="volume", description="Ajusta el volumen del reproductor (1-100).")
+    @app_commands.describe(nivel="Nivel de volumen entre 1 y 100")
+    async def volume_slash(
+        interaction: discord.Interaction,
+        nivel: app_commands.Range[int, 1, 100],
+    ):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        player.volume = nivel / 100
+        if player.voice_client and player.voice_client.source:
+            player.voice_client.source.volume = player.volume
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"🔊 Volumen ajustado a **{nivel}%**.",
+                color=EMBED_COLOR,
+            )
+        )
+
+    @bot.tree.command(name="nowplaying", description="Muestra la canción que se está reproduciendo ahora.")
+    async def nowplaying_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.current:
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ No hay nada reproduciéndose.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        await interaction.response.send_message(
+            embed=player.now_playing_embed(),
+            view=NowPlayingView(interaction.guild.id),
+        )
+
+    @bot.tree.command(name="loop", description="Alterna el modo de loop: sin loop / loop canción / loop cola.")
+    async def loop_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        player.loop_mode = player.loop_mode.next()
+        emoji = {LoopMode.OFF: "🔀", LoopMode.SONG: "🔂", LoopMode.QUEUE: "🔁"}[player.loop_mode]
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"{emoji} **{player.loop_mode.label()}**",
+                color=EMBED_COLOR,
+            )
+        )
+
+    @bot.tree.command(name="shuffle", description="Mezcla aleatoriamente la cola de reproducción.")
+    async def shuffle_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.queue:
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ La cola está vacía.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        random.shuffle(player.queue)
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                description=f"🔀 Cola mezclada ({len(player.queue)} canciones).",
+                color=EMBED_COLOR,
+            )
+        )
+
+    @bot.tree.command(name="leave", description="El bot abandona el canal de voz.")
+    async def leave_slash(interaction: discord.Interaction):
+        if not interaction.guild:
+            await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+            return
+        player = get_player(interaction.guild.id)
+        if not player.voice_client or not player.voice_client.is_connected():
+            await interaction.response.send_message(
+                embed=discord.Embed(description="❌ No estoy en ningún canal de voz.", color=EMBED_COLOR),
+                ephemeral=True,
+            )
+            return
+        await player.cleanup()
+        remove_player(interaction.guild.id)
+        await interaction.response.send_message(
+            embed=discord.Embed(description="👋 Saliendo del canal de voz.", color=EMBED_COLOR)
+        )
+
+    async def _on_voice_state_update(
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ) -> None:
+        if not bot.user or member.id != bot.user.id:
+            return
+        if before.channel and not after.channel:
+            player = get_player(member.guild.id)
+            player.voice_client = None
+            player.queue.clear()
+            player.current = None
+            remove_player(member.guild.id)
+
+    bot.add_listener(_on_voice_state_update, "on_voice_state_update")
+</file>
+
+<file path=".gitignore">
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode/
+.idea/
+
+# Database
+data/
+*.db
+
+# Logs
+*.log
+*.out
+*.err
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Graphify
+graphify-out/
+raw/
+
+# Generated docs
+TECHNICAL_DOC.md
+</file>
+
+<file path=".env.example">
+# Copia este archivo a .env y pon tus credenciales
+# NO coloques tokens reales aquí; usa .env (este archivo es público)
+
+# Token del bot de Discord (obligatorio)
+DISCORD_TOKEN=tu-token-de-bot-aqui
+
+# Habilitar lectura de contenido de mensajes (requiere habilitarlo en el Developer Portal)
+ENABLE_MESSAGE_CONTENT=true
+
+# ID del servidor para sync instantáneo de slash commands (opcional)
+# Sin esto, los comandos tardan hasta 1 hora en propagarse
+GUILD_ID=tu-id-de-servidor
+
+# Groq API Key — para generación de captions de memes automáticos con Vision
+GROQ_API_KEY=tu-groq-api-key
+
+# Límites de importación de historial (corpus)
+# /refeed: máximo de mensajes a leer del canal actual
+REFEED_MAX_MESSAGES=80000
+# /refeed_all: máximo de mensajes a leer por canal
+REFEED_ALL_MAX_MESSAGES=20000
+
+# Markov (muestra de entrenamiento)
+# Evita cargar todo el corpus a RAM. Se entrena con un muestreo aleatorio.
+MARKOV_TRAINING_MESSAGES=5000
+USER_MARKOV_TRAINING_MESSAGES=2000
+
+# Cloudflare R2 — almacenamiento permanente de GIFs de Discord CDN (opcional)
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_ENDPOINT_URL=
+R2_BUCKET_NAME=
+R2_PUBLIC_URL=
+</file>
+
+<file path="src/meme_generator.py">
+import io
+import os
+import re
+import textwrap
+from PIL import Image, ImageDraw, ImageFont
+
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_FONT_PATH = os.path.join(_BASE_DIR, "Impact.ttf")
+
+
+def _try_short_sentence(model, max_chars: int = 80, tries: int = 100) -> str | None:
+    import re
+    _DIGITS_RE = re.compile(r'\b\d{5,}\b')
+    for _ in range(tries):
+        candidate = model.generate(max_words=12, max_attempts=1, min_words=2)
+        if not candidate:
+            continue
+        candidate = _DIGITS_RE.sub('', candidate).strip()
+        candidate = re.sub(r'\s+', ' ', candidate).strip()
+        if candidate and len(candidate) <= max_chars:
+            return candidate
+    return None
+
+
+def render_caption(image_bytes: bytes, caption: str) -> bytes:
+    base = Image.open(io.BytesIO(image_bytes))
+    if hasattr(base, "n_frames") and base.n_frames > 1:
+        base.seek(0)
+    base = base.convert("RGBA")
+    img_w, img_h = base.size
+
+    text_upper = caption.upper()
+    import unicodedata
+    text_upper = unicodedata.normalize('NFKD', text_upper)
+    text_upper = ''.join(c for c in text_upper if not unicodedata.combining(c))
+    text_upper = re.sub(r'\s+', ' ', text_upper).strip()
+    padding_h = int(img_w * 0.05)
+    usable_w = img_w - 2 * padding_h
+
+    font_size = max(24, img_w // 12)
+    font = None
+    lines: list[str] = []
+
+    while font_size >= 16:
+        f = ImageFont.truetype(_FONT_PATH, font_size)
+        avg_char_w = max(1, f.getlength("A"))
+        chars_per_line = max(1, int(usable_w / avg_char_w))
+        wrapped = textwrap.wrap(text_upper, width=chars_per_line) or [text_upper[:max(1, chars_per_line)]]
+        if all(f.getlength(line) <= usable_w for line in wrapped):
+            font = f
+            lines = wrapped
+            break
+        font_size -= 2
+
+    if font is None:
+        font_size = 16
+        font = ImageFont.truetype(_FONT_PATH, font_size)
+        avg_char_w = max(1, font.getlength("A"))
+        chars_per_line = max(1, int(usable_w / avg_char_w))
+        lines = textwrap.wrap(text_upper, width=chars_per_line) or [text_upper[:max(1, chars_per_line)]]
+
+    ascent, descent = font.getmetrics()
+    line_h = ascent + descent
+
+    padding_v = int(img_w * 0.08)
+    min_banner_h = int(img_h * 0.12)
+    if len(lines) * line_h + 2 * padding_v < min_banner_h:
+        padding_v = (min_banner_h - len(lines) * line_h) // 2
+    banner_h = len(lines) * line_h + 2 * padding_v
+
+    out = Image.new("RGB", (img_w, banner_h + img_h), "white")
+
+    white_bg = Image.new("RGBA", base.size, (255, 255, 255, 255))
+    white_bg.alpha_composite(base)
+    out.paste(white_bg.convert("RGB"), (0, banner_h))
+
+    draw = ImageDraw.Draw(out)
+    y = padding_v
+    for line in lines:
+        line_w = font.getlength(line)
+        x = int((img_w - line_w) / 2)
+        draw.text((x, y), line, fill=(0, 0, 0), font=font)
+        y += line_h
+
+    buf = io.BytesIO()
+    out.save(buf, format="PNG")
+    buf.seek(0)
+    return buf.getvalue()
+
+
+import random as _random
+
+_SPLIT_CONNECTORS = [
+    "HASTA QUE", "Y ENTONCES",
+    "PERO", "CUANDO", "VS", "MIENTRAS", "ENTONCES", "PORQUE", "O",
+]
+
+
+def _find_connector_split(words: list[str]) -> tuple[str, str] | None:
+    for connector in _SPLIT_CONNECTORS:
+        conn_words = connector.split()
+        n = len(conn_words)
+        for i in range(1, len(words) - n):
+            if words[i:i + n] == conn_words:
+                return " ".join(words[:i]), " ".join(words[i:])
+    return None
+
+
+def render_meme(image_bytes: bytes, caption: str) -> bytes:
+    import unicodedata
+    base = Image.open(io.BytesIO(image_bytes))
+    if hasattr(base, "n_frames") and base.n_frames > 1:
+        base.seek(0)
+    base = base.convert("RGB")
+    img_w, img_h = base.size
+
+    text = caption.upper()
+    text = unicodedata.normalize('NFKD', text)
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    text = re.sub(r'\s+', ' ', text).strip()
+    if not text:
+        return image_bytes
+
+    words = text.split()
+    split = _find_connector_split(words) if len(words) >= 4 else None
+
+    if split:
+        top_text, bottom_text = split
+    else:
+        if _random.choice([True, False]):
+            top_text, bottom_text = text, None
+        else:
+            top_text, bottom_text = None, text
+
+    draw = ImageDraw.Draw(base)
+
+    def draw_outlined_text(txt: str, position: str):
+        if not txt:
+            return
+        padding_h = int(img_w * 0.05)
+        usable_w = img_w - 2 * padding_h
+        font_size = max(28, img_w // 10)
+        font = None
+        lines = []
+        while font_size >= 18:
+            f = ImageFont.truetype(_FONT_PATH, font_size)
+            avg_char_w = max(1, f.getlength("A"))
+            chars_per_line = max(1, int(usable_w / avg_char_w))
+            wrapped = textwrap.wrap(txt, width=chars_per_line) or [txt[:chars_per_line]]
+            if all(f.getlength(l) <= usable_w for l in wrapped):
+                font = f
+                lines = wrapped
+                break
+            font_size -= 2
+        if font is None:
+            font_size = 18
+            font = ImageFont.truetype(_FONT_PATH, font_size)
+            avg_char_w = max(1, font.getlength("A"))
+            chars_per_line = max(1, int(usable_w / avg_char_w))
+            lines = textwrap.wrap(txt, width=chars_per_line) or [txt]
+
+        ascent, descent = font.getmetrics()
+        line_h = ascent + descent
+        total_h = len(lines) * line_h
+        margin = int(img_h * 0.03)
+
+        if position == "top":
+            y = margin
+        else:
+            y = img_h - total_h - margin
+
+        outline = max(2, font_size // 12)
+
+        for line in lines:
+            line_w = font.getlength(line)
+            x = int((img_w - line_w) / 2)
+            for dx in range(-outline, outline + 1):
+                for dy in range(-outline, outline + 1):
+                    if dx == 0 and dy == 0:
+                        continue
+                    draw.text((x + dx, y + dy), line, fill=(0, 0, 0), font=font)
+            draw.text((x, y), line, fill=(255, 255, 255), font=font)
+            y += line_h
+
+    draw_outlined_text(top_text, "top")
+    draw_outlined_text(bottom_text, "bottom")
+
+    buf = io.BytesIO()
+    base.save(buf, format="PNG")
+    buf.seek(0)
+    return buf.getvalue()
+</file>
+
+<file path="README.md">
+<div align="center">
+
+# 🤖 Purgatory Bot
+
+**Bot de Discord que aprende a hablar como tu servidor.**
+
+Cadenas de Markov · Colección de GIFs · Notificaciones de YouTube
+
+---
+
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)
+![discord.py](https://img.shields.io/badge/discord.py-2.x-5865F2?style=flat-square&logo=discord&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-WAL-003B57?style=flat-square&logo=sqlite&logoColor=white)
+![Cloudflare R2](https://img.shields.io/badge/Cloudflare-R2-F38020?style=flat-square&logo=cloudflare&logoColor=white)
+
+</div>
+
+---
+
+## ✨ Características
+
+| | Característica | Descripción |
+|---|---|---|
+| 🧠 | **Markov automático** | Aprende del chat y genera réplicas al estilo del servidor cada 15 mensajes |
+| 🎭 | **Imitación de usuarios** | Imita el estilo de escritura de cualquier miembro con `/imitar` |
+| 💬 | **Modo chat** | Responde cuando lo mencionas o le haces reply |
+| 🎞️ | **Colección de GIFs** | Guarda GIFs de Tenor/Giphy automáticamente; los de Discord CDN se suben a R2 |
+| 📺 | **Notificaciones YouTube** | Sondea canales cada 15 min y avisa cuando hay video nuevo |
+| 🖼️ | **Memes (manual y automático)** | Genera memes con `/momo` o respondiendo a una imagen con `artemis generar`; opción de captions con Groq |
+| 🎯 | **Pool de imágenes** | Con reacción 🎯 a una imagen, se guarda en un pool para memes |
+| 🗂️ | **Corpus administrable** | Importa historial, consulta estadísticas, ignora canales o limpia el corpus |
+
+---
+
+## 🚀 Instalación
+
+### 1. Clonar e instalar dependencias
+
+```bash
+# Linux / macOS
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Windows (PowerShell)
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 2. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+```
+
+Edita `.env` con tus valores:
+
+```env
+# ── Obligatorio ────────────────────────────────────────────────────
+DISCORD_TOKEN=tu_token_aquí
+
+# ── Desarrollo (sync instantáneo de slash commands) ────────────────
+GUILD_ID=123456789012345678
+
+# ── Intents ────────────────────────────────────────────────────────
+ENABLE_MESSAGE_CONTENT=true
+
+# ── Límites de importación de historial (corpus) ───────────────────
+# /refeed: máximo de mensajes a leer del canal actual
+REFEED_MAX_MESSAGES=80000
+# /refeed_all: máximo de mensajes a leer por canal
+REFEED_ALL_MAX_MESSAGES=20000
+
+# ── Markov (muestra de entrenamiento) ──────────────────────────────
+# Evita cargar todo el corpus a RAM. Se entrena con un muestreo aleatorio.
+MARKOV_TRAINING_MESSAGES=5000
+USER_MARKOV_TRAINING_MESSAGES=2000
+
+# ── Cloudflare R2 (para persistir GIFs de Discord CDN) ────────────
+R2_ENDPOINT_URL=https://<account>.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=tu_key
+R2_SECRET_ACCESS_KEY=tu_secret
+R2_BUCKET_NAME=nombre-del-bucket
+R2_PUBLIC_URL=https://pub-xxx.r2.dev
+```
+
+### 3. Arrancar
+
+```bash
+python src/bot.py
+```
+
+---
+
+## 📋 Comandos
+
+### 🧠 Markov y corpus
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/refeed` | Importa los últimos mensajes del canal al corpus (máx. 80 000 por defecto) | Rol autorizado |
+| `/refeed_all` | Importa mensajes de todos los canales del servidor (máx. 20 000 por canal por defecto) | Rol autorizado |
+| `/generar` | Genera un mensaje con el modelo Markov del servidor | Todos |
+| `/imitar @usuario` | Genera un mensaje imitando el estilo del usuario (mín. 30 msgs) | Todos |
+| `/corpus_info` | Muestra cuántos mensajes tiene el corpus en el canal actual | Todos |
+| `/corpus_wipe` | Borra todo el corpus y reinicia la caché Markov | Rol autorizado |
+
+### 🚫 Canales ignorados (corpus)
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/corpus_ignorar add #canal` | Añade un canal a la lista de ignorados | Rol autorizado |
+| `/corpus_ignorar quitar #canal` | Quita un canal de la lista de ignorados | Rol autorizado |
+| `/corpus_ignorar lista` | Lista canales ignorados | Rol autorizado |
+
+### 💬 Chat automático
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/chatmode on [#canal]` | Activa auto-reply al ser mencionado o al responderle | Gestionar servidor |
+| `/chatmode off` | Desactiva el auto-reply | Gestionar servidor |
+
+### 🎞️ GIFs
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/gif_add <url>` | Añade un GIF manualmente (Tenor, Giphy o Discord CDN) | Rol autorizado |
+
+### 🖼️ Memes
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/momo` | Genera un meme usando una imagen del pool (cooldown ~45s por usuario) | Todos |
+| `/meme` | Alias de `/momo` | Todos |
+
+**Trigger rápido (sin slash):** responde (reply) a un mensaje con imagen y escribe `artemis generar` o `@bot generar`.
+
+### ⏱️ Memes automáticos
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/meme_auto activar #canal <horas>` | Activa memes automáticos cada 2–24h | Rol autorizado |
+| `/meme_auto desactivar #canal` | Desactiva memes automáticos | Rol autorizado |
+| `/meme_auto lista` | Lista configuración actual | Rol autorizado |
+
+### 📺 YouTube
+
+| Comando | Descripción | Permisos |
+|---|---|---|
+| `/youtube_add <channel_id> #canal [rol]` | Suscribe un canal de YouTube a un canal de Discord | Rol autorizado |
+| `/youtube_remove <channel_id>` | Elimina una suscripción | Rol autorizado |
+| `/youtube_list` | Lista todas las suscripciones activas del servidor | Rol autorizado |
+| `/youtube_set_mention <channel_id> [rol]` | Configura (o quita) el rol a mencionar en notificaciones | Rol autorizado |
+
+### 🔧 Utilidades
+
+| Comando | Descripción |
+|---|---|
+| `!ping` | Responde `Pong!` para verificar que el bot está online |
+
+---
+
+## ⚙️ Comportamiento automático
+
+<details>
+<summary><b>🧠 Construcción del corpus</b></summary>
+
+Cada mensaje de usuario pasa por un filtro antes de guardarse: se eliminan URLs, menciones de Discord, secuencias ANSI típicas de logs y líneas sin letras. Se colapsan espacios y se descartan mensajes que queden vacíos. El corpus deduplica por `(servidor, message_id)`.
+
+El bot mantiene **dos corpus independientes**:
+- **Servidor** — para respuestas generales (`/generar`, auto-reply)
+- **Por usuario** — exclusivo para `/imitar`
+
+</details>
+
+<details>
+<summary><b>⚡ Generación automática</b></summary>
+
+Cada **15 mensajes nuevos** insertados en el corpus de un canal, el bot genera una respuesta. Con un **35 % de probabilidad** envía un GIF aleatorio de la colección en lugar del texto.
+
+La caché del modelo Markov se invalida automáticamente cada **50 inserciones** para mantenerse actualizada.
+
+</details>
+
+<details>
+<summary><b>💬 Auto-reply (chatmode)</b></summary>
+
+Si el modo está activo, el bot responde cuando:
+- Lo mencionan con `@bot`
+- Alguien le hace reply a uno de sus mensajes
+
+Se puede restringir a un canal específico con `/chatmode on #canal`. Requiere el permiso **Gestionar servidor**.
+
+</details>
+
+<details>
+<summary><b>🎞️ Colección de GIFs</b></summary>
+
+Los GIFs detectados en mensajes (Tenor, Giphy, adjuntos `.gif`) se guardan automáticamente. Los de `cdn.discordapp.com` se suben a **Cloudflare R2** para que no caduquen cuando Discord elimine el adjunto original.
+
+</details>
+
+<details>
+<summary><b>🎯 Pool de imágenes</b></summary>
+
+Al reaccionar con **🎯** a un mensaje con imagen (`.png`, `.jpg`, `.jpeg`, `.webp`), el bot sube la imagen a **R2** (si está configurado) y guarda su URL en la base de datos para usarla luego en `/momo` y en los memes automáticos.
+
+</details>
+
+<details>
+<summary><b>😄 Reacción aleatoria</b></summary>
+
+Con un **5 % de probabilidad**, el bot reacciona a mensajes con un emoji custom del servidor.
+
+</details>
+
+<details>
+<summary><b>📺 Notificaciones de YouTube</b></summary>
+
+Una tarea en segundo plano sondea el RSS de cada canal suscrito cada **15 minutos**. Si detecta un video nuevo, envía un mensaje en el canal de Discord configurado con el título, enlace y mención al rol (si está configurado).
+
+</details>
+
+---
+
+## 🏗️ Estructura del proyecto
+
+```
+.
+├── src/
+│   ├── bot.py         # Lógica principal, eventos y slash commands
+│   ├── db.py          # Capa de datos: aiosqlite, WAL mode, migraciones
+│   └── __init__.py
+├── data/
+│   └── bot.db         # Base de datos SQLite (generada al arrancar)
+├── requirements.txt
+├── .env.example
+└── .gitignore
+```
+
+---
+
+## 🔐 Permisos necesarios
+
+Al generar el enlace de invitación en el **Developer Portal**:
+
+| Categoría | Valores requeridos |
+|---|---|
+| **OAuth2 Scopes** | `bot`, `applications.commands` |
+| **Permisos de bot** | `Read Messages` · `Send Messages` · `Read Message History` · `Add Reactions` · `Embed Links` |
+| **Intents privilegiados** | `Message Content Intent` · `Server Members Intent` |
+
+---
+
+## 📝 Notas
+
+> **Los slash commands tardan hasta 1 hora** en propagarse globalmente. Para verlos al instante en desarrollo, pon `GUILD_ID=<id>` en `.env`.
+
+> El modelo Markov necesita al menos **50 mensajes** en el corpus del servidor para generar respuestas, y **30** para `/imitar`.
+
+> La base de datos usa **modo WAL** para mejor concurrencia entre lecturas y escrituras asíncronas.
+
+> Si los slash commands no aparecen después de reiniciar, verifica que el bot esté invitado con el scope `applications.commands`.
+</file>
+
+<file path="requirements.txt">
+discord.py
+python-dotenv
+aiosqlite
+markovify
+boto3
+aiohttp
+requests
+feedparser
+regex
+Pillow
+groq
+yt-dlp
+PyNaCl
+</file>
+
+<file path="src/music_player.py">
+import asyncio
+import logging
+import os
+import re
+import time
+import urllib.parse
+from dataclasses import dataclass
+from enum import Enum
+from typing import Optional
+
+import discord
+import yt_dlp
+
+log = logging.getLogger(__name__)
+
+EMBED_COLOR = 0x8B00FF
+
+_COOKIES_PATH = '/opt/bot-discord-purg/cookies.txt'
+
+YTDL_OPTS = {
+    'format': 'bestaudio[ext=webm]/bestaudio[ext=m4a]/bestaudio/best',
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'quiet': True,
+    'no_warnings': False,
+    'default_search': 'scsearch',
+    'source_address': '0.0.0.0',
+    'extractor_args': {'youtube': {'player_client': ['ios', 'android', 'web']}},
+}
+
+_YT_RE = re.compile(
+    r'^https?://(?:www\.|m\.|music\.)?(?:youtube\.com/|youtu\.be/)',
+    re.IGNORECASE,
+)
+_URL_RE = re.compile(r'^https?://', re.IGNORECASE)
+
+
+class YouTubeNotAllowed(Exception):
+    pass
+
+
+class MediaFetchError(Exception):
+    def __init__(self, user_message: str):
+        super().__init__(user_message)
+        self.user_message = user_message
+
+
+def _is_youtube_info(info: dict) -> bool:
+    extractor = (info.get('extractor_key') or info.get('extractor') or '').lower()
+    return 'youtube' in extractor
+
+
+def _build_ytdl_opts() -> dict:
+    opts = dict(YTDL_OPTS)
+    if os.path.isfile(_COOKIES_PATH):
+        opts['cookiefile'] = _COOKIES_PATH
+    return opts
+
+
+def _resolve_query(query: str) -> str:
+    q = query.strip()
+    if _YT_RE.match(q):
+        return q
+    if _URL_RE.match(q):
+        return q
+    return f"scsearch:{q}"
+
+FFMPEG_OPTS = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+    'options': '-vn',
+}
+
+
+class LoopMode(Enum):
+    OFF = 0
+    SONG = 1
+    QUEUE = 2
+
+    def next(self) -> 'LoopMode':
+        modes = list(LoopMode)
+        return modes[(self.value + 1) % len(modes)]
+
+    def label(self) -> str:
+        return {
+            LoopMode.OFF: "Sin loop",
+            LoopMode.SONG: "Loop: canción",
+            LoopMode.QUEUE: "Loop: cola",
+        }[self]
+
+
+@dataclass
+class SongInfo:
+    title: str
+    webpage_url: str
+    duration: int
+    thumbnail: Optional[str]
+    requester: Optional[discord.Member]
+
+
+def fmt_duration(seconds: int) -> str:
+    m, s = divmod(max(0, seconds), 60)
+    h, m = divmod(m, 60)
+    if h:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m}:{s:02d}"
+
+
+def progress_bar(elapsed: int, total: int, width: int = 12) -> str:
+    if total <= 0:
+        return "░" * width + " --:-- / --:--"
+    clamped = min(elapsed, total)
+    filled = int(width * clamped / total)
+    return "▓" * filled + "░" * (width - filled) + f" {fmt_duration(clamped)} / {fmt_duration(total)}"
+
+
+async def fetch_song(query: str) -> Optional[SongInfo]:
+    """Extract song metadata (no stream URL) for a search query or URL."""
+    effective = _resolve_query(query)  # raises YouTubeNotAllowed if needed
+
+    def _extract():
+        opts = {**_build_ytdl_opts(), 'skip_download': True}
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(effective, download=False)
+                if not info:
+                    return None
+                if 'entries' in info:
+                    entries = [e for e in info['entries'] if e]
+                    if not entries:
+                        return None
+                    info = None
+                    for entry in entries:
+                        url = entry.get('url') or entry.get('webpage_url')
+                        if not url:
+                            continue
+                        try:
+                            candidate = ydl.extract_info(url, download=False)
+                        except yt_dlp.utils.DownloadError:
+                            continue
+                        except yt_dlp.utils.ExtractorError:
+                            continue
+                        if candidate and candidate.get('title'):
+                            info = candidate
+                            break
+                    if not info:
+                        return None
+                return info
+        except yt_dlp.utils.DownloadError as e:
+            msg = str(e)
+            if "Sign in" in msg or "bot" in msg.lower():
+                raise MediaFetchError(
+                    "❌ YouTube bloqueó la request. Las cookies pueden haber expirado — contacta al admin del bot."
+                ) from e
+            if "soundcloud" in msg.lower() and "404" in msg:
+                if _URL_RE.match(effective) and "soundcloud.com" in effective:
+                    raise MediaFetchError(
+                        "SoundCloud respondio 404. La pista puede estar privada o eliminada."
+                    ) from e
+                raise MediaFetchError(
+                    "SoundCloud respondio 404. La pista puede estar privada o eliminada."
+                ) from e
+            raise MediaFetchError("No se pudo obtener la informacion de esa URL.") from e
+        except yt_dlp.utils.ExtractorError as e:
+            msg = str(e)
+            if "soundcloud" in msg.lower() and "404" in msg:
+                raise MediaFetchError(
+                    "SoundCloud respondio 404. La pista puede estar privada o eliminada."
+                ) from e
+            raise MediaFetchError("No se pudo obtener la informacion de esa URL.") from e
+
+    loop = asyncio.get_running_loop()
+    info = await loop.run_in_executor(None, _extract)
+    if not info:
+        return None
+    if _is_youtube_info(info):
+        raise YouTubeNotAllowed(
+            "YouTube no esta disponible desde este servidor. "
+            "Usa SoundCloud o configura cookies para yt-dlp."
+        )
+    return SongInfo(
+        title=info.get('title', 'Desconocido'),
+        webpage_url=info.get('webpage_url') or info.get('url', query),
+        duration=int(info.get('duration') or 0),
+        thumbnail=info.get('thumbnail'),
+        requester=None,
+    )
+
+
+async def fetch_stream_url(webpage_url: str) -> Optional[str]:
+    """Get a fresh direct audio stream URL just before playing."""
+    def _extract():
+        opts = {**_build_ytdl_opts(), 'skip_download': True}
+        try:
+            with yt_dlp.YoutubeDL(opts) as ydl:
+                info = ydl.extract_info(webpage_url, download=False)
+                if not info:
+                    return None
+                if 'entries' in info:
+                    entries = [e for e in info['entries'] if e]
+                    info = entries[0] if entries else None
+                if not info:
+                    return None
+                if _is_youtube_info(info):
+                    return None
+                formats = info.get('formats', [])
+                audio_only = [f for f in formats if f.get('acodec') != 'none' and f.get('vcodec') == 'none']
+                if audio_only:
+                    return audio_only[-1].get('url')
+                return info.get('url')
+        except yt_dlp.utils.DownloadError as e:
+            log.warning("yt-dlp DownloadError en stream: %s", e)
+            return None
+        except yt_dlp.utils.ExtractorError as e:
+            log.warning("yt-dlp ExtractorError en stream: %s", e)
+            return None
+
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, _extract)
+
+
+class MusicPlayer:
+    def __init__(self, guild_id: int):
+        self.guild_id = guild_id
+        self.queue: list[SongInfo] = []
+        self.current: Optional[SongInfo] = None
+        self.voice_client: Optional[discord.VoiceClient] = None
+        self.volume: float = 0.5
+        self.loop_mode: LoopMode = LoopMode.OFF
+        self.text_channel: Optional[discord.abc.Messageable] = None
+        self._play_start: float = 0.0
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
+
+    def is_active(self) -> bool:
+        return self.voice_client is not None and (
+            self.voice_client.is_playing() or self.voice_client.is_paused()
+        )
+
+    def elapsed(self) -> int:
+        return int(time.monotonic() - self._play_start) if self._play_start else 0
+
+    def _after(self, error: Optional[Exception]) -> None:
+        if error:
+            log.error("Error en reproducción guild %s: %s", self.guild_id, error)
+        if self._loop and not self._loop.is_closed():
+            asyncio.run_coroutine_threadsafe(self._advance(), self._loop)
+
+    async def _advance(self) -> None:
+        if self.loop_mode == LoopMode.SONG and self.current:
+            self.queue.insert(0, self.current)
+        elif self.loop_mode == LoopMode.QUEUE and self.current:
+            self.queue.append(self.current)
+
+        if not self.queue:
+            self.current = None
+            if self.text_channel:
+                embed = discord.Embed(
+                    description="✅ Cola vacía. El bot ha salido del canal.",
+                    color=EMBED_COLOR,
+                )
+                try:
+                    await self.text_channel.send(embed=embed)
+                except Exception:
+                    pass
+            if self.voice_client and self.voice_client.is_connected():
+                await self.voice_client.disconnect()
+                self.voice_client = None
+            return
+
+        self.current = self.queue.pop(0)
+        await self._play_current()
+
+    async def _play_current(self) -> None:
+        if not self.voice_client or not self.voice_client.is_connected():
+            return
+
+        stream_url = await fetch_stream_url(self.current.webpage_url)
+        if not stream_url:
+            if self.text_channel:
+                try:
+                    await self.text_channel.send(embed=discord.Embed(
+                        description=f"❌ No se pudo reproducir **{self.current.title}**. Saltando...",
+                        color=EMBED_COLOR,
+                    ))
+                except Exception:
+                    pass
+            await self._advance()
+            return
+
+        pcm = discord.FFmpegPCMAudio(stream_url, **FFMPEG_OPTS)
+        source = discord.PCMVolumeTransformer(pcm, volume=self.volume)
+        self._play_start = time.monotonic()
+        self._loop = asyncio.get_running_loop()
+        self.voice_client.play(source, after=self._after)
+
+        if self.text_channel:
+            try:
+                await self.text_channel.send(embed=self.now_playing_embed())
+            except Exception:
+                pass
+
+    async def play(
+        self,
+        voice_channel: discord.VoiceChannel,
+        song: SongInfo,
+        text_channel: discord.abc.Messageable,
+    ) -> bool:
+        """Add song and start playing if idle. Returns True if started, False if queued."""
+        self.text_channel = text_channel
+
+        if not self.voice_client or not self.voice_client.is_connected():
+            self.voice_client = await voice_channel.connect()
+
+        if self.is_active():
+            self.queue.append(song)
+            return False
+
+        self.current = song
+        await self._play_current()
+        return True
+
+    def now_playing_embed(self) -> discord.Embed:
+        song = self.current
+        if not song:
+            return discord.Embed(description="No hay nada reproduciéndose.", color=EMBED_COLOR)
+        elapsed = self.elapsed()
+        embed = discord.Embed(
+            title="🎵 Reproduciendo ahora",
+            description=f"**[{song.title}]({song.webpage_url})**",
+            color=EMBED_COLOR,
+        )
+        embed.add_field(
+            name="Progreso",
+            value=f"`{progress_bar(elapsed, song.duration)}`",
+            inline=False,
+        )
+        embed.add_field(name="Duración", value=fmt_duration(song.duration), inline=True)
+        embed.add_field(name="Loop", value=self.loop_mode.label(), inline=True)
+        embed.add_field(name="Volumen", value=f"{int(self.volume * 100)}%", inline=True)
+        if song.requester:
+            embed.set_footer(
+                text=f"Pedido por {song.requester.display_name}",
+                icon_url=song.requester.display_avatar.url,
+            )
+        if song.thumbnail:
+            embed.set_thumbnail(url=song.thumbnail)
+        return embed
+
+    async def cleanup(self) -> None:
+        self.queue.clear()
+        self.current = None
+        self._play_start = 0.0
+        if self.voice_client:
+            if self.voice_client.is_playing() or self.voice_client.is_paused():
+                self.voice_client.stop()
+            if self.voice_client.is_connected():
+                await self.voice_client.disconnect()
+            self.voice_client = None
+
+
+_players: dict[int, MusicPlayer] = {}
+
+
+def get_player(guild_id: int) -> MusicPlayer:
+    if guild_id not in _players:
+        _players[guild_id] = MusicPlayer(guild_id)
+    return _players[guild_id]
+
+
+def remove_player(guild_id: int) -> None:
+    _players.pop(guild_id, None)
+</file>
+
+<file path="src/db.py">
+import os
+import asyncio
+import logging
+import aiosqlite
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+DB_PATH = os.path.join(DATA_DIR, "bot.db")
+
+log = logging.getLogger(__name__)
+
+_db: aiosqlite.Connection | None = None
+_db_lock = asyncio.Lock()
+
+
+async def get_db() -> aiosqlite.Connection:
+    if _db is None:
+        raise RuntimeError("Base de datos no inicializada. Llama a init_db() primero.")
+    return _db
+
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS settings (
+    guild_id INTEGER PRIMARY KEY,
+    chat_mode_enabled INTEGER NOT NULL DEFAULT 1,
+    chat_channel_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS corpus_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
+    message_id INTEGER,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(guild_id, message_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_corpus_messages_guild ON corpus_messages(guild_id);
+CREATE INDEX IF NOT EXISTS idx_corpus_messages_guild_channel ON corpus_messages(guild_id, channel_id);
+
+CREATE TABLE IF NOT EXISTS corpus_gifs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(guild_id, url)
+);
+
+CREATE TABLE IF NOT EXISTS youtube_subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
+    youtube_channel_id TEXT NOT NULL,
+    youtube_channel_name TEXT NOT NULL,
+    last_video_id TEXT,
+    discord_channel_id INTEGER NOT NULL,
+    UNIQUE(guild_id, youtube_channel_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_corpus (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id INTEGER NOT NULL,
+    author_id INTEGER NOT NULL,
+    author_name TEXT NOT NULL,
+    message_id INTEGER,
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(guild_id, message_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_corpus_guild_author ON user_corpus(guild_id, author_id);
+
+CREATE TABLE IF NOT EXISTS ignored_channels (
+    guild_id INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
+    PRIMARY KEY (guild_id, channel_id)
+);
+
+CREATE TABLE IF NOT EXISTS meme_schedule (
+    guild_id INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
+    interval_minutes INTEGER NOT NULL DEFAULT 180,
+    last_posted_at TEXT,
+    PRIMARY KEY (guild_id, channel_id)
+);
+
+CREATE TABLE IF NOT EXISTS corpus_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(guild_id, url)
+);
+
+CREATE TABLE IF NOT EXISTS frases_especiales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    user_name TEXT NOT NULL,
+    frase TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_frases_especiales_guild ON frases_especiales(guild_id);
+"""
+
+
+async def init_db():
+    global _db
+    if _db is not None:
+        return
+    os.makedirs(DATA_DIR, exist_ok=True)
+    _db = await aiosqlite.connect(DB_PATH)
+    # Activar modo WAL para mejor concurrencia
+    await _db.execute("PRAGMA journal_mode=WAL")
+    await _db.execute("PRAGMA synchronous=NORMAL")
+    # Crear tablas
+    await _db.executescript(SCHEMA)
+    try:
+        await _db.execute("ALTER TABLE youtube_subscriptions ADD COLUMN mention_role_id INTEGER")
+        await _db.commit()
+    except Exception:
+        log.debug("Columna mention_role_id ya existe en youtube_subscriptions")
+    await _db.commit()
+    flag_path = os.path.join(DATA_DIR, ".images_wiped_v2")
+    if not os.path.exists(flag_path):
+        await _db.execute("DELETE FROM corpus_images")
+        await _db.commit()
+        with open(flag_path, "w") as f:
+            f.write("done")
+        log.info("corpus_images wipeado - migracion v2")
+
+
+async def close_db():
+    global _db
+    if _db is not None:
+        await _db.close()
+        _db = None
+
+
+def _was_inserted(cursor: aiosqlite.Cursor) -> bool:
+    return cursor.rowcount == 1
+
+
+# Settings helpers
+async def set_chat_mode(guild_id: int, enabled: bool, channel_id: int | None = None):
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "INSERT INTO settings (guild_id, chat_mode_enabled, chat_channel_id) "
+            "VALUES (?, ?, ?) "
+            "ON CONFLICT(guild_id) DO UPDATE SET "
+            "    chat_mode_enabled=excluded.chat_mode_enabled, "
+            "    chat_channel_id=excluded.chat_channel_id",
+            (guild_id, 1 if enabled else 0, channel_id),
+        )
+        await db.commit()
+
+
+async def get_chat_settings(guild_id: int):
+    db = await get_db()
+    async with db.execute(
+        "SELECT chat_mode_enabled, chat_channel_id FROM settings WHERE guild_id=?",
+        (guild_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+        if not row:
+            return {"enabled": True, "channel_id": None}
+        return {"enabled": bool(row[0]), "channel_id": row[1]}
+
+
+async def save_corpus_message(guild_id: int, channel_id: int, content: str, message_id: int | None = None) -> bool:
+    text = (content or "").strip()
+    if not text:
+        return False
+
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR IGNORE INTO corpus_messages (guild_id, channel_id, message_id, content) VALUES (?, ?, ?, ?)",
+            (guild_id, channel_id, message_id, text),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def save_corpus_and_user_message(
+    guild_id: int,
+    channel_id: int,
+    author_id: int,
+    author_name: str,
+    content: str,
+    message_id: int | None = None,
+) -> tuple[bool, bool]:
+    text = (content or "").strip()
+    if not text:
+        return False, False
+
+    db = await get_db()
+    async with _db_lock:
+        cur1 = await db.execute(
+            "INSERT OR IGNORE INTO corpus_messages (guild_id, channel_id, message_id, content) VALUES (?, ?, ?, ?)",
+            (guild_id, channel_id, message_id, text),
+        )
+        corpus_inserted = _was_inserted(cur1)
+        cur2 = await db.execute(
+            "INSERT OR IGNORE INTO user_corpus (guild_id, author_id, author_name, message_id, content) VALUES (?, ?, ?, ?, ?)",
+            (guild_id, author_id, author_name, message_id, text),
+        )
+        user_inserted = _was_inserted(cur2)
+        await db.commit()
+    return corpus_inserted, user_inserted
+
+
+async def count_corpus_messages(guild_id: int, channel_id: int) -> int:
+    db = await get_db()
+    async with db.execute(
+        "SELECT COUNT(*) FROM corpus_messages WHERE guild_id=? AND channel_id=?",
+        (guild_id, channel_id),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return int(row[0] if row else 0)
+
+
+async def get_corpus_messages(guild_id: int, limit: int | None = None) -> list[str]:
+    db = await get_db()
+    if limit is None:
+        query = "SELECT content FROM corpus_messages WHERE guild_id=? ORDER BY RANDOM()"
+        params = (guild_id,)
+    else:
+        query = (
+            "SELECT content FROM corpus_messages "
+            "WHERE guild_id = ? AND id IN ("
+            "    SELECT id FROM corpus_messages WHERE guild_id = ? ORDER BY RANDOM() LIMIT ?"
+            ")"
+        )
+        params = (guild_id, guild_id, limit)
+    async with db.execute(query, params) as cursor:
+        rows = await cursor.fetchall()
+    return [r[0] for r in rows]
+
+
+async def get_corpus_messages_filtered(
+    guild_id: int,
+    min_words: int = 5,
+    limit: int = 300,
+) -> list[str]:
+    db = await get_db()
+    query = (
+        "SELECT content FROM corpus_messages "
+        "WHERE guild_id = ? "
+        "AND (length(content) - length(replace(content, ' ', ''))) >= ? "
+        "AND id IN ("
+        "    SELECT id FROM corpus_messages "
+        "    WHERE guild_id = ? "
+        "    AND (length(content) - length(replace(content, ' ', ''))) >= ? "
+        "    ORDER BY RANDOM() LIMIT ?"
+        ")"
+    )
+    async with db.execute(query, (guild_id, min_words - 1, guild_id, min_words - 1, limit)) as cursor:
+        rows = await cursor.fetchall()
+    return [r[0] for r in rows]
+
+
+async def wipe_corpus(guild_id: int) -> None:
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "DELETE FROM corpus_messages WHERE guild_id=?",
+            (guild_id,),
+        )
+        await db.commit()
+
+
+async def save_gif_url(guild_id: int, url: str) -> bool:
+    u = (url or "").strip()
+    if not u:
+        return False
+
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR IGNORE INTO corpus_gifs (guild_id, url) VALUES (?, ?)",
+            (guild_id, u),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def get_random_gif(guild_id: int) -> str | None:
+    db = await get_db()
+    async with db.execute(
+        "SELECT url FROM corpus_gifs WHERE guild_id=? ORDER BY RANDOM() LIMIT 1",
+        (guild_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return row[0] if row else None
+
+
+async def count_gif_urls(guild_id: int) -> int:
+    db = await get_db()
+    async with db.execute(
+        "SELECT COUNT(*) FROM corpus_gifs WHERE guild_id=?",
+        (guild_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return int(row[0] if row else 0)
+
+
+async def add_youtube_sub(
+    guild_id: int,
+    channel_id: int,
+    youtube_channel_id: str,
+    youtube_channel_name: str,
+    discord_channel_id: int,
+    mention_role_id: int | None = None,
+) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR IGNORE INTO youtube_subscriptions "
+            "(guild_id, channel_id, youtube_channel_id, youtube_channel_name, discord_channel_id, mention_role_id) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (guild_id, channel_id, youtube_channel_id, youtube_channel_name, discord_channel_id, mention_role_id),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def remove_youtube_sub(guild_id: int, youtube_channel_id: str) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "DELETE FROM youtube_subscriptions WHERE guild_id=? AND youtube_channel_id=?",
+            (guild_id, youtube_channel_id),
+        )
+        removed = cursor.rowcount > 0
+        await db.commit()
+    return removed
+
+
+async def list_youtube_subs(guild_id: int) -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT id, guild_id, channel_id, youtube_channel_id, youtube_channel_name, last_video_id, discord_channel_id, mention_role_id "
+        "FROM youtube_subscriptions WHERE guild_id=?",
+        (guild_id,),
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {
+            "id": r[0],
+            "guild_id": r[1],
+            "channel_id": r[2],
+            "youtube_channel_id": r[3],
+            "youtube_channel_name": r[4],
+            "last_video_id": r[5],
+            "discord_channel_id": r[6],
+            "mention_role_id": r[7],
+        }
+        for r in rows
+    ]
+
+
+async def get_all_youtube_subs() -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT id, guild_id, channel_id, youtube_channel_id, youtube_channel_name, last_video_id, discord_channel_id, mention_role_id "
+        "FROM youtube_subscriptions"
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {
+            "id": r[0],
+            "guild_id": r[1],
+            "channel_id": r[2],
+            "youtube_channel_id": r[3],
+            "youtube_channel_name": r[4],
+            "last_video_id": r[5],
+            "discord_channel_id": r[6],
+            "mention_role_id": r[7],
+        }
+        for r in rows
+    ]
+
+
+async def update_last_video_id(guild_id: int, youtube_channel_id: str, video_id: str) -> None:
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "UPDATE youtube_subscriptions SET last_video_id=? WHERE guild_id=? AND youtube_channel_id=?",
+            (video_id, guild_id, youtube_channel_id),
+        )
+        await db.commit()
+
+
+async def set_youtube_mention_role(guild_id: int, youtube_channel_id: str, role_id: int | None) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "UPDATE youtube_subscriptions SET mention_role_id=? WHERE guild_id=? AND youtube_channel_id=?",
+            (role_id, guild_id, youtube_channel_id),
+        )
+        updated = cursor.rowcount > 0
+        await db.commit()
+    return updated
+
+
+async def save_user_message(guild_id: int, author_id: int, author_name: str, content: str, message_id: int | None = None) -> bool:
+    text = (content or "").strip()
+    if not text:
+        return False
+
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR IGNORE INTO user_corpus (guild_id, author_id, author_name, message_id, content) VALUES (?, ?, ?, ?, ?)",
+            (guild_id, author_id, author_name, message_id, text),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def get_user_messages(guild_id: int, author_id: int, limit: int | None = None) -> list[str]:
+    db = await get_db()
+    if limit is None:
+        query = "SELECT content FROM user_corpus WHERE guild_id=? AND author_id=? ORDER BY RANDOM()"
+        params = (guild_id, author_id)
+    else:
+        query = (
+            "SELECT content FROM user_corpus "
+            "WHERE guild_id = ? AND author_id = ? AND id IN ("
+            "    SELECT id FROM user_corpus WHERE guild_id = ? AND author_id = ? ORDER BY RANDOM() LIMIT ?"
+            ")"
+        )
+        params = (guild_id, author_id, guild_id, author_id, limit)
+    async with db.execute(query, params) as cursor:
+        rows = await cursor.fetchall()
+    return [r[0] for r in rows]
+
+
+async def count_user_messages(guild_id: int, author_id: int) -> int:
+    db = await get_db()
+    async with db.execute(
+        "SELECT COUNT(*) FROM user_corpus WHERE guild_id=? AND author_id=?",
+        (guild_id, author_id),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return int(row[0] if row else 0)
+
+
+async def add_ignored_channel(guild_id: int, channel_id: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR IGNORE INTO ignored_channels (guild_id, channel_id) VALUES (?, ?)",
+            (guild_id, channel_id),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def remove_ignored_channel(guild_id: int, channel_id: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "DELETE FROM ignored_channels WHERE guild_id=? AND channel_id=?",
+            (guild_id, channel_id),
+        )
+        removed = cursor.rowcount > 0
+        await db.commit()
+    return removed
+
+
+async def list_ignored_channels(guild_id: int) -> list[int]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT channel_id FROM ignored_channels WHERE guild_id=? ORDER BY channel_id",
+        (guild_id,),
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [r[0] for r in rows]
+
+
+async def is_channel_ignored(guild_id: int, channel_id: int) -> bool:
+    db = await get_db()
+    async with db.execute(
+        "SELECT 1 FROM ignored_channels WHERE guild_id=? AND channel_id=? LIMIT 1",
+        (guild_id, channel_id),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return row is not None
+
+
+async def add_meme_schedule(guild_id: int, channel_id: int, interval_minutes: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR REPLACE INTO meme_schedule (guild_id, channel_id, interval_minutes) VALUES (?, ?, ?)",
+            (guild_id, channel_id, interval_minutes),
+        )
+        inserted = cursor.rowcount > 0
+        await db.commit()
+    return inserted
+
+
+async def remove_meme_schedule(guild_id: int, channel_id: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "DELETE FROM meme_schedule WHERE guild_id=? AND channel_id=?",
+            (guild_id, channel_id),
+        )
+        removed = cursor.rowcount > 0
+        await db.commit()
+    return removed
+
+
+async def list_meme_schedules(guild_id: int) -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT channel_id, interval_minutes, last_posted_at FROM meme_schedule WHERE guild_id=? ORDER BY channel_id",
+        (guild_id,),
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {"channel_id": r[0], "interval_minutes": r[1], "last_posted_at": r[2]}
+        for r in rows
+    ]
+
+
+async def get_due_meme_schedules() -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT guild_id, channel_id, interval_minutes FROM meme_schedule "
+        "WHERE last_posted_at IS NULL "
+        "   OR datetime(last_posted_at, '+' || interval_minutes || ' minutes') <= datetime('now')"
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {"guild_id": r[0], "channel_id": r[1], "interval_minutes": r[2]}
+        for r in rows
+    ]
+
+
+async def update_meme_last_posted(guild_id: int, channel_id: int) -> None:
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "UPDATE meme_schedule SET last_posted_at = datetime('now') WHERE guild_id=? AND channel_id=?",
+            (guild_id, channel_id),
+        )
+        await db.commit()
+
+
+async def save_image_url(guild_id: int, url: str) -> bool:
+    """Guarda URL de imagen del server. Retorna True si fue insertada."""
+    u = (url or "").strip()
+    if not u:
+        return False
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT OR IGNORE INTO corpus_images (guild_id, url) VALUES (?, ?)",
+            (guild_id, u),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def get_random_image_url(guild_id: int) -> str | None:
+    """Retorna una URL de imagen random del pool del server."""
+    db = await get_db()
+    async with db.execute(
+        "SELECT url FROM corpus_images WHERE guild_id=? ORDER BY RANDOM() LIMIT 1",
+        (guild_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return row[0] if row else None
+
+
+async def count_image_urls(guild_id: int) -> int:
+    db = await get_db()
+    async with db.execute(
+        "SELECT COUNT(*) FROM corpus_images WHERE guild_id=?",
+        (guild_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return int(row[0] if row else 0)
+
+
+async def delete_image_url(guild_id: int, url: str) -> None:
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "DELETE FROM corpus_images WHERE guild_id=? AND url=?",
+            (guild_id, url),
+        )
+        await db.commit()
+
+
+async def get_random_image_url_excluding(
+    guild_id: int,
+    exclude_url: str | None = None,
+) -> str | None:
+    db = await get_db()
+    if exclude_url:
+        async with db.execute(
+            "SELECT url FROM corpus_images "
+            "WHERE guild_id=? AND url != ? "
+            "ORDER BY RANDOM() LIMIT 1",
+            (guild_id, exclude_url),
+        ) as cursor:
+            row = await cursor.fetchone()
+    else:
+        async with db.execute(
+            "SELECT url FROM corpus_images "
+            "WHERE guild_id=? ORDER BY RANDOM() LIMIT 1",
+            (guild_id,),
+        ) as cursor:
+            row = await cursor.fetchone()
+    return row[0] if row else None
+
+
+async def add_frase_especial(guild_id: int, user_id: int, user_name: str, frase: str) -> bool:
+    text = (frase or "").strip()
+    if not text:
+        return False
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "INSERT INTO frases_especiales (guild_id, user_id, user_name, frase) VALUES (?, ?, ?, ?)",
+            (guild_id, user_id, user_name, text),
+        )
+        inserted = _was_inserted(cursor)
+        await db.commit()
+    return inserted
+
+
+async def get_random_frase_especial(guild_id: int) -> str | None:
+    db = await get_db()
+    async with db.execute(
+        "SELECT frase FROM frases_especiales WHERE guild_id=? ORDER BY RANDOM() LIMIT 1",
+        (guild_id,),
+    ) as cursor:
+        row = await cursor.fetchone()
+    return row[0] if row else None
+
+
+async def list_frases_especiales(guild_id: int) -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT id, user_id, user_name, frase, created_at "
+        "FROM frases_especiales WHERE guild_id=? ORDER BY id",
+        (guild_id,),
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [
+        {"id": r[0], "user_id": r[1], "user_name": r[2], "frase": r[3], "created_at": r[4]}
+        for r in rows
+    ]
+
+
+async def get_frase_especial(guild_id: int, frase_id: int) -> dict | None:
+    db = await get_db()
+    async with db.execute(
+        "SELECT id, user_id, user_name, frase, created_at "
+        "FROM frases_especiales WHERE guild_id=? AND id=?",
+        (guild_id, frase_id),
+    ) as cursor:
+        row = await cursor.fetchone()
+    if not row:
+        return None
+    return {"id": row[0], "user_id": row[1], "user_name": row[2], "frase": row[3], "created_at": row[4]}
+
+
+async def delete_frase_especial(guild_id: int, frase_id: int) -> bool:
+    db = await get_db()
+    async with _db_lock:
+        cursor = await db.execute(
+            "DELETE FROM frases_especiales WHERE guild_id=? AND id=?",
+            (guild_id, frase_id),
+        )
+        deleted = cursor.rowcount > 0
+        await db.commit()
+    return deleted
+</file>
+
+<file path="src/bot.py">
+import io
+import os
+import sys
+import re
+import regex
+import random
+import asyncio
+import hashlib
+import logging
+import requests
+from datetime import datetime
+import boto3
+import feedparser
+from collections import OrderedDict
+from logging.handlers import RotatingFileHandler
+from botocore.config import Config
+from markov_engine import SimpleMarkov
+from meme_generator import render_meme, render_caption, _try_short_sentence
+
+import discord
+from discord import app_commands
+from discord.ext import commands, tasks
+from dotenv import load_dotenv
+from db import (
+    init_db,
+    close_db,
+    set_chat_mode,
+    get_chat_settings,
+    save_corpus_and_user_message,
+    get_corpus_messages,
+    get_corpus_messages_filtered,
+    count_corpus_messages,
+    wipe_corpus,
+    save_gif_url,
+    get_random_gif,
+    count_gif_urls,
+    add_youtube_sub,
+    remove_youtube_sub,
+    list_youtube_subs,
+    get_all_youtube_subs,
+    update_last_video_id,
+    set_youtube_mention_role,
+    get_user_messages,
+    count_user_messages,
+    add_ignored_channel,
+    remove_ignored_channel,
+    list_ignored_channels,
+    is_channel_ignored,
+    add_meme_schedule,
+    remove_meme_schedule,
+    list_meme_schedules,
+    get_due_meme_schedules,
+    update_meme_last_posted,
+    save_image_url,
+    get_random_image_url,
+    count_image_urls,
+    get_random_image_url_excluding,
+    delete_image_url,
+    add_frase_especial,
+    get_random_frase_especial,
+    list_frases_especiales,
+    get_frase_especial,
+    delete_frase_especial,
+)
+
+# Cargar variables de entorno
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
+ENABLE_MESSAGE_CONTENT = os.getenv("ENABLE_MESSAGE_CONTENT", "true").strip().lower() in ("1", "true", "yes")
+GUILD_ID_ENV = os.getenv("GUILD_ID")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        value = int(str(raw).strip())
+    except Exception:
+        return default
+    return value if value > 0 else default
+
+# Configurar logging
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_LOG_PATH = os.path.join(_BASE_DIR, "data", "bot.log")
+os.makedirs(os.path.dirname(_LOG_PATH), exist_ok=True)
+
+_fmt = logging.Formatter("%(asctime)s %(levelname)-8s %(name)s: %(message)s")
+_fh = RotatingFileHandler(_LOG_PATH, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
+_fh.setFormatter(_fmt)
+_sh = logging.StreamHandler()
+_sh.setFormatter(_fmt)
+logging.basicConfig(level=logging.INFO, handlers=[_fh, _sh])
+logging.getLogger("discord").setLevel(logging.WARNING)
+logging.getLogger("discord.http").setLevel(logging.WARNING)
+
+log = logging.getLogger(__name__)
+
+if not TOKEN:
+    log.critical("Falta DISCORD_TOKEN en .env. Copia .env.example a .env y pon tu token.")
+    sys.exit(1)
+
+# Configurar intents
+intents = discord.Intents.default()
+intents.message_content = ENABLE_MESSAGE_CONTENT
+
+# Conectores comunes para recortar finales de frases incompletas.
+_CONECTORES_FINALES = [
+    " y", " o", " con", " pero", " de", " para", " a", " que", " entonces", " como"
+]
+
+
+class _LRUDict(OrderedDict):
+    def __init__(self, maxsize: int):
+        super().__init__()
+        self._maxsize = maxsize
+
+    def get(self, key, default=None):
+        if key not in self:
+            return default
+        self.move_to_end(key)
+        return super().__getitem__(key)
+
+    def __setitem__(self, key, value):
+        if key in self:
+            self.move_to_end(key)
+        super().__setitem__(key, value)
+        while len(self) > self._maxsize:
+            self.popitem(last=False)
+
+
+_markov_cache: _LRUDict = _LRUDict(64)
+_message_counter: _LRUDict = _LRUDict(256)
+_corpus_insert_counter: _LRUDict = _LRUDict(256)
+_user_markov_cache: _LRUDict = _LRUDict(64)
+_user_corpus_insert_counter: _LRUDict = _LRUDict(256)
+_momo_cooldowns: dict[tuple[int, int], float] = {}
+_last_meme_image: dict[int, str] = {}
+
+_GIF_RE = re.compile(r'https?://\S*(tenor\.com|giphy\.com|cdn\.discordapp\.com/attachments/\S*\.gif)\S*', re.IGNORECASE)
+_REFEED_MAX_MESSAGES = _env_int("REFEED_MAX_MESSAGES", 80_000)
+_REFEED_ALL_MAX_MESSAGES = _env_int("REFEED_ALL_MAX_MESSAGES", 20_000)
+_MARKOV_TRAINING_MESSAGES = _env_int("MARKOV_TRAINING_MESSAGES", 5_000)
+_USER_MARKOV_TRAINING_MESSAGES = _env_int("USER_MARKOV_TRAINING_MESSAGES", 2_000)
+SPECIAL_PHRASE_PROBABILITY = 0.20
+
+_r2_client = boto3.client(
+    "s3",
+    endpoint_url=os.getenv("R2_ENDPOINT_URL"),
+    aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+    config=Config(signature_version="s3v4"),
+    region_name="auto",
+)
+
+from groq import AsyncGroq
+_groq_client = AsyncGroq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+
+def has_admin_permission(interaction: discord.Interaction) -> bool:
+    if not isinstance(interaction.user, discord.Member):
+        return False
+    return interaction.user.guild_permissions.manage_guild
+
+
+def _note_corpus_insert(guild_id: int, channel_id: int) -> None:
+    key = (guild_id, channel_id)
+    n = _corpus_insert_counter.get(key, 0) + 1
+    if n >= 50:
+        _corpus_insert_counter[key] = 0
+        _markov_cache.pop(guild_id, None)
+    else:
+        _corpus_insert_counter[key] = n
+
+
+def _note_user_corpus_insert(guild_id: int, author_id: int) -> None:
+    key = (guild_id, author_id)
+    n = _user_corpus_insert_counter.get(key, 0) + 1
+    if n >= 50:
+        _user_corpus_insert_counter[key] = 0
+        _user_markov_cache.pop(key, None)
+    else:
+        _user_corpus_insert_counter[key] = n
+
+
+# 1. BOT CUSTOM PARA CIERRE LIMPIO DE BASE DE DATOS
+class MyCustomBot(commands.Bot):
+    async def close(self):
+        log.info("Cerrando conexión a la base de datos...")
+        await close_db()
+        await super().close()
+
+
+bot = MyCustomBot(command_prefix="!", intents=intents)
+bot.remove_command("help")
+
+
+# --- UTILIDADES ---
+def chunk_message(text: str, max_length: int = 1900) -> list[str]:
+    """Divide un texto largo en fragmentos que Discord pueda aceptar, intentando no cortar palabras."""
+    if len(text) <= max_length:
+        return [text]
+
+    chunks = []
+    while text:
+        if len(text) <= max_length:
+            chunks.append(text)
+            break
+        chunk = text[:max_length]
+        last_newline = chunk.rfind('\n')
+        last_space = chunk.rfind(' ')
+        cut_index = last_newline if last_newline > 0 else (last_space if last_space > 0 else max_length)
+        chunks.append(text[:cut_index].strip())
+        text = text[cut_index:].strip()
+    return chunks
+
+
+_EMOJI_RE = regex.compile(r'[\p{Extended_Pictographic}\p{Emoji_Component}]+', regex.UNICODE)
+
+
+# Postproceso para recortar muletillas y finales raros.
+def post_process_reply(text: str) -> str:
+    if not text:
+        return "me quedé en blanco, pregunta de nuevo"
+
+    # Limpieza básica
+    text = text.lower().strip()
+    text = _EMOJI_RE.sub("", text).strip()
+    text = re.sub(r"\s+", " ", text)
+
+    # Filtro de conectores finales
+    changed = True
+    while changed:
+        changed = False
+        for con in _CONECTORES_FINALES:
+            if text.endswith(con):
+                text = text[:-len(con)].strip()
+                changed = True
+
+    if text.endswith("."):
+        text = text.rstrip(".")
+
+    if not text.strip():
+        text = "no sé xd"
+
+    return text.strip()
+
+
+_ANSI_ESCAPE_RE = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
+_ANSI_BRACKET_RE = re.compile(r'\]\d*;[^\]]*')
+_URL_RE = re.compile(r'https?://\S+', re.IGNORECASE)
+_DISCORD_MENTIONS_RE = re.compile(r'<a?:\w+:\d+>|<@!?\d+>|<#\d+>|<@&\d+>')
+
+
+def clean_for_corpus(text: str) -> str | None:
+    t = (text or "").strip()
+    if not t:
+        return None
+
+    # Eliminar secuencias ANSI y basura típica de logs
+    t = _ANSI_ESCAPE_RE.sub(" ", t)
+    t = _ANSI_BRACKET_RE.sub(" ", t)
+    t = t.replace("[0m", " ").replace("][", " ")
+
+    # Eliminar URLs y menciones Discord
+    t = _URL_RE.sub(" ", t)
+    t = _DISCORD_MENTIONS_RE.sub(" ", t)
+    t = re.sub(r'\b\d{5,}\b', '', t)
+
+    # Eliminar líneas que sean solo números/símbolos/caracteres especiales
+    kept_lines: list[str] = []
+    for line in t.splitlines():
+        s = line.strip()
+        if not s:
+            continue
+        if not any(ch.isalpha() for ch in s):
+            continue
+        kept_lines.append(s)
+
+    t = " ".join(kept_lines)
+    t = re.sub(r"\s+", " ", t).strip()
+    if not t:
+        return None
+    return t
+
+
+async def build_markov_model(guild_id: int) -> SimpleMarkov | None:
+    cached = _markov_cache.get(guild_id)
+    if cached is not None:
+        return cached
+
+    corpus = await get_corpus_messages(guild_id, limit=_MARKOV_TRAINING_MESSAGES)
+    if len(corpus) < 50:
+        return None
+
+    def build() -> SimpleMarkov:
+        m = SimpleMarkov()
+        m.add_many(corpus)
+        return m
+
+    try:
+        model = await asyncio.to_thread(build)
+    except Exception:
+        log.exception("Error construyendo modelo Markov para guild %s", guild_id)
+        return None
+
+    _markov_cache[guild_id] = model
+    return model
+
+
+async def generate_markov_reply(guild_id: int) -> str | None:
+    model = await build_markov_model(guild_id)
+    if not model or model.is_empty:
+        return None
+
+    try:
+        sentence = await asyncio.to_thread(
+            model.generate,
+            max_words=20,
+            max_attempts=5,
+            min_words=1,
+        )
+    except Exception:
+        log.exception("Error generando frase Markov para guild %s", guild_id)
+        sentence = None
+
+    return sentence
+
+
+async def generate_markov_for_user(guild_id: int, author_id: int) -> str | None:
+    key = (guild_id, author_id)
+    model = _user_markov_cache.get(key)
+    if model is None:
+        corpus = await get_user_messages(guild_id, author_id, limit=_USER_MARKOV_TRAINING_MESSAGES)
+        if len(corpus) < 30:
+            return None
+
+        def build() -> SimpleMarkov:
+            m = SimpleMarkov()
+            m.add_many(corpus)
+            return m
+
+        try:
+            model = await asyncio.to_thread(build)
+        except Exception:
+            log.exception("Error construyendo modelo Markov para usuario %s", author_id)
+            return None
+        _user_markov_cache[key] = model
+
+    try:
+        sentence = await asyncio.to_thread(
+            model.generate,
+            max_words=20,
+            max_attempts=5,
+            min_words=1,
+        )
+    except Exception:
+        log.exception("Error generando frase Markov para usuario %s", author_id)
+        sentence = None
+    return sentence
+
+
+async def generate_response(guild_id: int) -> tuple[str | None, bool]:
+    """Decide entre frase especial o Markov. Retorna (texto, es_especial).
+    es_especial=True indica que el texto no debe pasar por post_process_reply."""
+    if random.random() < SPECIAL_PHRASE_PROBABILITY:
+        phrase = await get_random_frase_especial(guild_id)
+        if phrase:
+            return phrase, True
+    return await generate_markov_reply(guild_id), False
+
+
+def upload_gif_to_r2_sync(url: str, guild_id: int) -> str | None:
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; bot)"}
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code != 200:
+            log.error("HTTP %s al descargar GIF para R2: %s", resp.status_code, url)
+            return None
+        data = resp.content
+        key = f"{guild_id}/{hashlib.md5(url.encode(), usedforsecurity=False).hexdigest()}.gif"
+        _r2_client.put_object(
+            Bucket=os.getenv("R2_BUCKET_NAME", ""),
+            Key=key,
+            Body=data,
+            ContentType="image/gif",
+        )
+        return f"{os.getenv('R2_PUBLIC_URL', '').rstrip('/')}/{key}"
+    except Exception:
+        log.exception("Error subiendo GIF a R2: %s", url)
+        return None
+
+
+_IMAGE_CONTENT_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+}
+
+
+def upload_image_to_r2_sync(url: str, guild_id: int, ext: str) -> str | None:
+    content_type = _IMAGE_CONTENT_TYPES.get(ext.lower(), "image/png")
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; bot)"}
+        resp = requests.get(url, headers=headers, timeout=15)
+        if resp.status_code != 200:
+            log.error("HTTP %s al descargar imagen para R2: %s", resp.status_code, url)
+            return None
+        data = resp.content
+        key = f"{guild_id}/{hashlib.md5(url.encode(), usedforsecurity=False).hexdigest()}{ext}"
+        _r2_client.put_object(
+            Bucket=os.getenv("R2_BUCKET_NAME", ""),
+            Key=key,
+            Body=data,
+            ContentType=content_type,
+        )
+        return f"{os.getenv('R2_PUBLIC_URL', '').rstrip('/')}/{key}"
+    except Exception:
+        log.exception("Error subiendo imagen a R2: %s", url)
+        return None
+
+
+_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+_MEME_MAX_BYTES = 10 * 1024 * 1024
+
+
+async def handle_meme_command(message: discord.Message) -> None:
+    log.info(
+        "handle_meme_command: message_id=%s content=%r has_reference=%s ref_message_id=%s",
+        message.id,
+        message.content,
+        message.reference is not None,
+        message.reference.message_id if message.reference else None,
+    )
+
+    if not message.reference or not message.reference.message_id:
+        log.info("handle_meme_command: no es reply, ignorando")
+        return
+
+    ref = message.reference.resolved
+    if ref is None or isinstance(ref, discord.DeletedReferencedMessage):
+        log.info("handle_meme_command: ref no resuelto, haciendo fetch de message_id=%s", message.reference.message_id)
+        try:
+            ref = await message.channel.fetch_message(message.reference.message_id)
+        except Exception:
+            log.info("handle_meme_command: fetch del mensaje referenciado falló, ignorando")
+            return
+    if not isinstance(ref, discord.Message):
+        log.info("handle_meme_command: ref es %s (no es Message válido), ignorando", type(ref).__name__)
+        return
+
+    log.info("handle_meme_command: ref resuelto OK, message_id=%s, attachments=%d", ref.id, len(ref.attachments))
+
+    image_att = next(
+        (a for a in ref.attachments if os.path.splitext(a.filename.lower())[1] in _IMAGE_EXTS),
+        None,
+    )
+    if image_att is None:
+        log.info("handle_meme_command: no se encontró attachment de imagen en el mensaje referenciado")
+        await message.reply("necesito una imagen pa generar el momo")
+        return
+
+    log.info("handle_meme_command: imagen encontrada filename=%r size=%d bytes", image_att.filename, image_att.size)
+
+    if image_att.size > _MEME_MAX_BYTES:
+        await message.reply("la imagen pesa mucho")
+        return
+
+    try:
+        img_bytes = await image_att.read()
+    except Exception:
+        log.exception("Error descargando imagen para meme")
+        await message.reply("se rompio algo")
+        return
+
+    if not message.guild:
+        log.info("handle_meme_command: mensaje fuera de guild, no hay modelo Markov disponible")
+        await message.reply("no me salio nada, intenta de nuevo")
+        return
+
+    log.info("handle_meme_command: generando caption")
+
+    text = None
+    if _groq_client:
+        corpus_sample = await get_corpus_messages_filtered(message.guild.id, min_words=1, limit=400)
+        if corpus_sample:
+            text = await generate_groq_meme_caption(img_bytes, corpus_sample)
+    if not text:
+        model = await build_markov_model(message.guild.id)
+        if model and not model.is_empty:
+            text = await asyncio.to_thread(_try_short_sentence, model)
+    log.info("handle_meme_command: texto generado=%r", text)
+    if not text:
+        await message.reply("no me salio nada, intenta de nuevo")
+        return
+
+    try:
+        meme_bytes = await asyncio.to_thread(render_caption, img_bytes, text)
+    except Exception:
+        log.exception("Error generando meme con Pillow")
+        await message.reply("se rompio algo")
+        return
+
+    await message.reply(file=discord.File(io.BytesIO(meme_bytes), filename="meme.png"))
+
+
+# --- EVENTOS PRINCIPALES ---
+async def get_latest_video(youtube_channel_id: str) -> dict | None:
+    url = f"https://www.youtube.com/feeds/videos.xml?channel_id={youtube_channel_id}"
+    try:
+        feed = await asyncio.to_thread(feedparser.parse, url)
+        if not feed.entries:
+            return None
+        entry = feed.entries[0]
+        video_id = getattr(entry, "yt_videoid", None) or entry.get("id", "").split(":")[-1]
+        if not video_id:
+            return None
+        return {
+            "id": video_id,
+            "title": entry.get("title", ""),
+            "url": entry.get("link", ""),
+            "author": entry.get("author", ""),
+        }
+    except Exception:
+        log.exception("Error obteniendo RSS para canal YouTube %s", youtube_channel_id)
+        return None
+
+
+@tasks.loop(minutes=15)
+async def check_youtube():
+    subs = await get_all_youtube_subs()
+
+    async def _check_one(sub: dict) -> None:
+        try:
+            video = await get_latest_video(sub["youtube_channel_id"])
+            if video is None:
+                return
+            if video["id"] != sub["last_video_id"]:
+                channel = bot.get_channel(sub["discord_channel_id"])
+                if channel and isinstance(channel, discord.TextChannel):
+                    mention = ""
+                    if sub.get("mention_role_id"):
+                        mention = f"<@&{sub['mention_role_id']}> "
+                    await channel.send(
+                        f"{mention}📺 **{video['author']}** subió un video nuevo!\n"
+                        f"**{video['title']}**\n{video['url']}"
+                    )
+                    await update_last_video_id(sub["guild_id"], sub["youtube_channel_id"], video["id"])
+        except Exception:
+            log.exception("Error procesando suscripción YouTube %s", sub["youtube_channel_id"])
+
+    await asyncio.gather(*(_check_one(sub) for sub in subs))
+
+
+def _detect_image_mime(image_bytes: bytes) -> str:
+    if image_bytes[:4] == b'\x89PNG':
+        return "image/png"
+    if image_bytes[:2] == b'\xff\xd8':
+        return "image/jpeg"
+    if image_bytes[:4] == b'RIFF' and image_bytes[8:12] == b'WEBP':
+        return "image/webp"
+    if image_bytes[:3] == b'GIF':
+        return "image/gif"
+    return "image/jpeg"
+
+
+async def generate_groq_meme_caption(
+    image_bytes: bytes,
+    corpus_sample: list[str],
+) -> str | None:
+    if not _groq_client:
+        log.warning("GROQ_API_KEY no configurada")
+        return None
+
+    import base64
+    mime_type = _detect_image_mime(image_bytes)
+    image_b64 = base64.standard_b64encode(image_bytes).decode("utf-8")
+
+    short_msgs = [m for m in corpus_sample if len(m.split()) <= 5]
+    long_msgs = [m for m in corpus_sample if len(m.split()) > 5]
+    voice_sample = short_msgs[:25] + long_msgs[:15]
+    corpus_text = "\n".join(voice_sample)
+
+    system_prompt = (
+        "You write ironic meme captions for a Spanish-speaking Discord server. "
+        "The humor comes from dissonance: the caption introduces a subject, expectation, or context "
+        "that clashes with what the image actually shows — that clash is the joke. "
+        "Never describe or narrate the image. "
+        "Techniques: attribute the image to a subject that clearly doesn't fit it; "
+        "set up a high expectation that the image deflates; "
+        "present the image as evidence of the opposite of what it shows; "
+        "compare the image to a grand or grave concept it contradicts. "
+        "POV and CUANDO only work when what follows contrasts with the image, not when it summarizes it. "
+        "Use the vocabulary and tone from the server corpus. "
+        "Max 80 characters. Return only the caption text, nothing else."
+    )
+
+    user_prompt = (
+        f"Vocabulario y registro de este server:\n"
+        f"{corpus_text}\n\n"
+        f"Mira la imagen. Escribe un caption que cree contraste con lo que muestra: "
+        f"introducí un sujeto, expectativa o contexto que no encaje. "
+        f"Usa las palabras y el registro de arriba. "
+        f"Máximo 80 caracteres."
+    )
+
+    try:
+        response = await _groq_client.chat.completions.create(
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{mime_type};base64,{image_b64}"
+                            },
+                        },
+                        {"type": "text", "text": user_prompt},
+                    ],
+                },
+            ],
+            max_tokens=120,
+            temperature=0.9,
+        )
+        caption = response.choices[0].message.content.strip()
+        caption = caption.strip('"').strip("'").strip()
+        if len(caption) > 80:
+            caption = caption[:80].rsplit(" ", 1)[0].strip()
+        return caption if caption else None
+    except Exception as e:
+        if "429" in str(e) or "rate_limit" in str(e).lower():
+            log.warning("Groq rate limit, fallback a Markov")
+            return None
+        log.exception("Error en Groq caption")
+        return None
+
+
+@tasks.loop(minutes=10)
+async def auto_meme_task():
+    schedules = await get_due_meme_schedules()
+    for schedule in schedules:
+        try:
+            channel = bot.get_channel(schedule["channel_id"])
+            if not channel or not isinstance(channel, discord.TextChannel):
+                continue
+
+            # Obtener imagen válida del pool (con eviction lazy de URLs expiradas)
+            guild_id = schedule["guild_id"]
+            img_bytes = None
+            image_url = None
+            last = _last_meme_image.get(guild_id)
+            for _ in range(10):
+                url_candidate = await get_random_image_url_excluding(guild_id, exclude_url=last)
+                if not url_candidate:
+                    break
+                try:
+                    img_resp = await asyncio.to_thread(requests.get, url_candidate, timeout=15)
+                    if img_resp.status_code == 200 and len(img_resp.content) <= _MEME_MAX_BYTES:
+                        img_bytes = img_resp.content
+                        image_url = url_candidate
+                        break
+                    else:
+                        log.warning("auto_meme: URL inválida (HTTP %s), eliminando: %s", img_resp.status_code, url_candidate)
+                        await delete_image_url(guild_id, url_candidate)
+                except Exception:
+                    log.warning("auto_meme: error descargando, eliminando del pool: %s", url_candidate)
+                    await delete_image_url(guild_id, url_candidate)
+
+            if not image_url:
+                log.info("auto_meme: sin imágenes válidas en pool para guild %s", guild_id)
+                continue
+            _last_meme_image[guild_id] = image_url
+
+            # Obtener muestra del corpus
+            corpus_sample = await get_corpus_messages_filtered(
+                guild_id, min_words=1, limit=400
+            )
+            if not corpus_sample:
+                log.info(
+                    "auto_meme: corpus vacío para guild %s",
+                    guild_id
+                )
+                continue
+
+            # Generar caption con Groq, con fallback a Markov si falla
+            caption = None
+            if _groq_client:
+                caption = await generate_groq_meme_caption(img_bytes, corpus_sample)
+            if not caption:
+                model = await build_markov_model(guild_id)
+                caption = await asyncio.to_thread(
+                    _try_short_sentence, model
+                ) if model and not model.is_empty else None
+
+            if not caption:
+                log.info("auto_meme: no se generó caption para guild %s", guild_id)
+                continue
+
+            # Renderizar y postear
+            meme_bytes = await asyncio.to_thread(render_caption, img_bytes, caption)
+            await channel.send(
+                file=discord.File(io.BytesIO(meme_bytes), filename="meme.png")
+            )
+            await update_meme_last_posted(
+                guild_id, schedule["channel_id"]
+            )
+            log.info(
+                "auto_meme: meme posteado en canal %s con caption: %s",
+                schedule["channel_id"], caption
+            )
+
+        except Exception:
+            log.exception(
+                "auto_meme: error inesperado para canal %s",
+                schedule["channel_id"]
+            )
+
+
+@bot.event
+async def on_ready():
+    await init_db()
+    if not check_youtube.is_running():
+        check_youtube.start()
+    if not auto_meme_task.is_running():
+        auto_meme_task.start()
+
+    try:
+        log.info("Iniciando sincronización de comandos")
+
+        if GUILD_ID_ENV:
+            # Sync instantáneo a un servidor específico (desarrollo)
+            guild_obj = discord.Object(id=int(GUILD_ID_ENV))
+            bot.tree.copy_global_to(guild=guild_obj)
+            synced = await bot.tree.sync(guild=guild_obj)
+            log.info("Sync al servidor %s: %s", GUILD_ID_ENV, [c.name for c in synced])
+        else:
+            # Sync global (puede tardar hasta 1 hora en propagarse)
+            synced = await bot.tree.sync()
+            log.info("Sync global: %s", [c.name for c in synced])
+
+    except Exception:
+        log.exception("Error en la sincronización de comandos")
+
+    log.info("Bot listo como %s", bot.user)
+
+
+@bot.event
+async def on_command_error(ctx: commands.Context, error: Exception):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ No tienes permisos para usar este comando.")
+        return
+    elif isinstance(error, commands.CommandNotFound):
+        return
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"⚠️ Faltan argumentos. Revisa cómo usar el comando.")
+        return
+    log.error("Error en comando %s", getattr(ctx, "command", None), exc_info=error)
+
+
+def _is_meme_trigger(message: discord.Message) -> bool:
+    parts = (message.content or "").strip().lower().split()
+    if parts == ["artemis", "generar"]:
+        return True
+    if bot.user:
+        for mention in (f"<@{bot.user.id}>", f"<@!{bot.user.id}>"):
+            if parts == [mention, "generar"]:
+                return True
+    return False
+
+
+@bot.event
+async def on_message(message: discord.Message):
+    if message.author.bot:
+        return
+
+    if _is_meme_trigger(message):
+        await handle_meme_command(message)
+        return
+
+    # 1. Procesar comandos básicos (!ping, !chat)
+    await bot.process_commands(message)
+    if (message.content or "").strip().startswith("!"):
+        return
+
+    auto_generate = False
+
+    if message.guild:
+        if await is_channel_ignored(message.guild.id, message.channel.id):
+            return
+
+        # Guardar GIFs (tenor/giphy) si aparecen en el mensaje
+        if message.content:
+            for m in _GIF_RE.finditer(message.content):
+                try:
+                    url = m.group(0)
+                    if "cdn.discordapp.com" in url:
+                        r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, message.guild.id)
+                        if r2_url:
+                            url = r2_url
+                    await save_gif_url(message.guild.id, url)
+                except Exception:
+                    log.exception("Error guardando GIF de mensaje: %s", m.group(0))
+
+        for attachment in message.attachments:
+            if attachment.url and (
+                attachment.url.lower().endswith('.gif') or
+                (attachment.content_type and 'gif' in attachment.content_type)
+            ):
+                try:
+                    url = attachment.url
+                    if "cdn.discordapp.com" in url:
+                        r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, message.guild.id)
+                        if r2_url:
+                            url = r2_url
+                    await save_gif_url(message.guild.id, url)
+                except Exception:
+                    log.exception("Error guardando GIF adjunto: %s", attachment.url)
+
+        cleaned = clean_for_corpus(message.content or "")
+        inserted = False
+        if cleaned is not None:
+            inserted, user_inserted = await save_corpus_and_user_message(
+                message.guild.id, message.channel.id,
+                message.author.id, message.author.display_name, cleaned,
+                message_id=message.id,
+            )
+            if user_inserted:
+                _note_user_corpus_insert(message.guild.id, message.author.id)
+        if inserted:
+            _note_corpus_insert(message.guild.id, message.channel.id)
+            key = (message.guild.id, message.channel.id)
+            _message_counter[key] = _message_counter.get(key, 0) + 1
+            if _message_counter[key] >= 15:
+                _message_counter[key] = 0
+                auto_generate = True
+
+        # Reacción aleatoria con emoji custom del server
+        if random.random() < 0.05:
+            try:
+                emojis = list(getattr(message.guild, "emojis", []) or [])
+                if emojis:
+                    await message.add_reaction(random.choice(emojis))
+            except Exception:
+                log.exception("Error añadiendo reacción emoji")
+
+    # 2. Verificar si el bot fue mencionado o si le respondieron a él directamente
+    mention_bot = bool(bot.user and bot.user.id in (message.raw_mentions or []))
+    reply_to_bot = False
+    if message.reference and message.reference.message_id and bot.user:
+        ref_msg = message.reference.resolved
+        if isinstance(ref_msg, discord.Message):
+            reply_to_bot = ref_msg.author.id == bot.user.id
+
+    if not (mention_bot or reply_to_bot):
+        if message.guild and auto_generate:
+            try:
+                if random.random() < 0.45:
+                    gif_url = await get_random_gif(message.guild.id)
+                    if gif_url:
+                        await message.channel.send(gif_url)
+                        return
+                text, is_special = await generate_response(message.guild.id)
+                if text is not None:
+                    final = text if is_special else post_process_reply(text)
+                    for chunk in chunk_message(final):
+                        await message.channel.send(chunk)
+            except Exception:
+                log.exception("Error en generación automática de respuesta")
+        return
+
+    if not message.guild:
+        return
+
+    # 3. Respetar restricciones de canal y modo de chat
+    settings = await get_chat_settings(message.guild.id)
+    if not settings["enabled"]:
+        return
+    if settings["channel_id"] and message.channel.id != settings["channel_id"]:
+        return
+
+    if random.random() < 0.45:
+        gif_url = await get_random_gif(message.guild.id)
+        if gif_url:
+            await message.reply(gif_url)
+            return
+
+    text, is_special = await generate_response(message.guild.id)
+    if text is None:
+        reply = "..."
+    elif is_special:
+        reply = text
+    else:
+        reply = post_process_reply(text)
+    for chunk in chunk_message(reply):
+        await message.reply(chunk)
+
+
+@bot.event
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    if str(payload.emoji) != "🎯":
+        return
+    if payload.guild_id is None:
+        return
+    channel = bot.get_channel(payload.channel_id)
+    if not isinstance(channel, discord.TextChannel):
+        return
+    try:
+        message = await channel.fetch_message(payload.message_id)
+    except Exception:
+        return
+    if message.author.bot:
+        return
+    added = False
+    for attachment in message.attachments:
+        ext = os.path.splitext(attachment.filename.lower())[1]
+        if ext in {".png", ".jpg", ".jpeg", ".webp"} \
+                and attachment.size <= _MEME_MAX_BYTES:
+            try:
+                r2_url = await asyncio.to_thread(
+                    upload_image_to_r2_sync, attachment.url, payload.guild_id, ext
+                )
+                if not r2_url:
+                    log.warning("No se pudo subir imagen a R2: %s", attachment.url)
+                    continue
+                inserted = await save_image_url(payload.guild_id, r2_url)
+                if inserted:
+                    added = True
+                    log.info("Imagen agregada al pool 🎯 (R2): %s", r2_url)
+            except Exception:
+                log.exception("Error guardando imagen por reaccion")
+    if added:
+        try:
+            await message.add_reaction("✅")
+        except Exception:
+            pass
+
+
+# --- COMANDOS BÁSICOS ---
+@bot.command(name="ping")
+async def ping(ctx: commands.Context):
+    await ctx.send("Pong!")
+
+
+# --- SLASH COMMANDS ---
+@bot.tree.command(name="refeed", description="Guarda los últimos mensajes del canal en el corpus del modelo Markov.")
+async def refeed_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    await interaction.response.defer(thinking=True)
+
+    channel = interaction.channel
+    if not isinstance(channel, discord.abc.Messageable):
+        await interaction.followup.send("No puedo leer el historial de este canal.")
+        return
+
+    if await is_channel_ignored(interaction.guild.id, channel.id):
+        await interaction.followup.send("⚠️ Este canal está en la lista de ignorados. Usa `/corpus_ignorar quitar` primero si quieres incluirlo.")
+        return
+
+    saved = 0
+    fetched = 0
+
+    last_msg_id: int | None = None
+    while fetched < _REFEED_MAX_MESSAGES:
+        before_obj = discord.Object(id=last_msg_id) if last_msg_id else None
+        try:
+            batch = [msg async for msg in channel.history(limit=100, before=before_obj, oldest_first=False)]
+        except discord.Forbidden:
+            await interaction.followup.send("❌ Sin permisos para leer el historial de este canal.")
+            return
+        if not batch:
+            break
+        fetched += len(batch)
+
+        for msg in batch:
+            if msg.author.bot:
+                continue
+
+            if msg.content:
+                for m in _GIF_RE.finditer(msg.content):
+                    try:
+                        url = m.group(0)
+                        if "cdn.discordapp.com" in url:
+                            r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                            if r2_url:
+                                url = r2_url
+                        await save_gif_url(interaction.guild.id, url)
+                    except Exception:
+                        log.exception("Error procesando GIF en refeed: %s", m.group(0))
+
+            for attachment in msg.attachments:
+                if attachment.url and (
+                    attachment.url.lower().endswith('.gif') or
+                    (attachment.content_type and 'gif' in attachment.content_type)
+                ):
+                    try:
+                        url = attachment.url
+                        if "cdn.discordapp.com" in url:
+                            r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                            if r2_url:
+                                url = r2_url
+                        await save_gif_url(interaction.guild.id, url)
+                    except Exception:
+                        log.exception("Error procesando GIF adjunto en refeed: %s", attachment.url)
+
+            cleaned = clean_for_corpus(msg.content or "")
+            if cleaned is None:
+                continue
+            corpus_ins, user_ins = await save_corpus_and_user_message(
+                interaction.guild.id, msg.channel.id,
+                msg.author.id, msg.author.display_name, cleaned,
+                message_id=msg.id,
+            )
+            if corpus_ins:
+                saved += 1
+                _note_corpus_insert(interaction.guild.id, msg.channel.id)
+            if user_ins:
+                _note_user_corpus_insert(interaction.guild.id, msg.author.id)
+
+        last_msg_id = batch[-1].id
+
+    result = f"✅ Guardados {saved} mensajes en el corpus."
+    if fetched >= _REFEED_MAX_MESSAGES:
+        result += f"\n⚠️ Límite de {_REFEED_MAX_MESSAGES:,} mensajes leídos alcanzado; el canal puede tener más."
+    await interaction.followup.send(result)
+
+
+@bot.tree.command(name="refeed_all", description="Guarda mensajes de todos los canales de texto del servidor en el corpus del modelo Markov.")
+async def refeed_all_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    await interaction.response.defer(thinking=True)
+
+    me = interaction.guild.me
+    if me is None and bot.user is not None:
+        me = interaction.guild.get_member(bot.user.id)
+    if me is None:
+        await interaction.followup.send("No puedo determinar los permisos del bot.")
+        return
+
+    total_saved = 0
+    total_fetched = 0
+    any_channel_hit_limit = False
+
+    for channel in interaction.guild.text_channels:
+        perms = channel.permissions_for(me)
+        if not (perms.read_messages and perms.read_message_history):
+            continue
+        if await is_channel_ignored(interaction.guild.id, channel.id):
+            continue
+
+        saved = 0
+        channel_fetched = 0
+        last_msg_id: int | None = None
+        while channel_fetched < _REFEED_ALL_MAX_MESSAGES:
+            before_obj = discord.Object(id=last_msg_id) if last_msg_id else None
+            try:
+                batch = [msg async for msg in channel.history(limit=100, before=before_obj, oldest_first=False)]
+            except discord.Forbidden:
+                break
+            if not batch:
+                break
+            batch_len = len(batch)
+            channel_fetched += batch_len
+            total_fetched += batch_len
+
+            for msg in batch:
+                if msg.author.bot:
+                    continue
+
+                if msg.content:
+                    for m in _GIF_RE.finditer(msg.content):
+                        try:
+                            url = m.group(0)
+                            if "cdn.discordapp.com" in url:
+                                r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                                if r2_url:
+                                    url = r2_url
+                            await save_gif_url(interaction.guild.id, url)
+                        except Exception:
+                            log.exception("Error procesando GIF en refeed_all: %s", m.group(0))
+
+                for attachment in msg.attachments:
+                    if attachment.url and (
+                        attachment.url.lower().endswith('.gif') or
+                        (attachment.content_type and 'gif' in attachment.content_type)
+                    ):
+                        try:
+                            url = attachment.url
+                            if "cdn.discordapp.com" in url:
+                                r2_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+                                if r2_url:
+                                    url = r2_url
+                            await save_gif_url(interaction.guild.id, url)
+                        except Exception:
+                            log.exception("Error procesando GIF adjunto en refeed_all: %s", attachment.url)
+
+                cleaned = clean_for_corpus(msg.content or "")
+                if cleaned is None:
+                    continue
+                corpus_ins, user_ins = await save_corpus_and_user_message(
+                    interaction.guild.id, msg.channel.id,
+                    msg.author.id, msg.author.display_name, cleaned,
+                    message_id=msg.id,
+                )
+                if corpus_ins:
+                    saved += 1
+                    _note_corpus_insert(interaction.guild.id, msg.channel.id)
+                if user_ins:
+                    _note_user_corpus_insert(interaction.guild.id, msg.author.id)
+
+            last_msg_id = batch[-1].id
+
+        if channel_fetched >= _REFEED_ALL_MAX_MESSAGES:
+            any_channel_hit_limit = True
+        total_saved += saved
+
+    result = f"✅ Refeed_all completado. Total guardado: {total_saved} mensajes."
+    if any_channel_hit_limit:
+        result += f"\n⚠️ Límite de {_REFEED_ALL_MAX_MESSAGES:,} mensajes leídos alcanzado; algunos canales pueden estar incompletos."
+    await interaction.followup.send(result)
+
+
+@bot.tree.command(name="generar", description="Genera un mensaje usando el modelo Markov del canal.")
+async def generar_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+
+    await interaction.response.defer(thinking=True)
+    if interaction.channel is None:
+        await interaction.followup.send("No puedo determinar el canal.", ephemeral=True)
+        return
+    text, is_special = await generate_response(interaction.guild.id)
+    if text is None:
+        reply = "..."
+    elif is_special:
+        reply = text
+    else:
+        reply = post_process_reply(text)
+    await interaction.followup.send(reply)
+
+
+@bot.tree.command(name="chatmode", description="Activa o desactiva las respuestas automáticas del bot al mencionarlo.")
+@app_commands.describe(
+    estado="Activar o desactivar",
+    canal="Canal específico para auto-reply (opcional, por defecto todos)"
+)
+@app_commands.choices(estado=[
+    app_commands.Choice(name="Activar", value="on"),
+    app_commands.Choice(name="Desactivar", value="off"),
+])
+async def chatmode_slash(interaction: discord.Interaction, estado: app_commands.Choice[str], canal: discord.TextChannel | None = None):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not isinstance(interaction.user, discord.Member) or not interaction.user.guild_permissions.manage_guild:
+        await interaction.response.send_message("❌ Necesitas el permiso `Gestionar servidor`.", ephemeral=True)
+        return
+
+    enabled = estado.value == "on"
+    channel_id = canal.id if canal else None
+    await set_chat_mode(interaction.guild.id, enabled, channel_id)
+
+    if enabled:
+        if canal:
+            msg = f"✅ Auto-reply activado solo en {canal.mention}."
+        else:
+            msg = "✅ Auto-reply activado en todos los canales."
+    else:
+        msg = "❌ Auto-reply desactivado."
+
+    await interaction.response.send_message(msg)
+
+
+@bot.tree.command(name="corpus_wipe", description="Borra el corpus del servidor (mensajes) y reinicia el cache Markov.")
+async def corpus_wipe_slash(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    if not interaction.guild:
+        await interaction.followup.send("Solo en servidores.", ephemeral=True)
+        return
+
+    if not has_admin_permission(interaction):
+        await interaction.followup.send("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    await wipe_corpus(interaction.guild.id)
+
+    # Limpiar caches por guild
+    gid = interaction.guild.id
+    _markov_cache.pop(gid, None)
+    for key in [k for k in _corpus_insert_counter.keys() if k[0] == gid]:
+        _corpus_insert_counter.pop(key, None)
+    for key in [k for k in _message_counter.keys() if k[0] == gid]:
+        _message_counter.pop(key, None)
+    for key in [k for k in _user_corpus_insert_counter.keys() if k[0] == gid]:
+        _user_corpus_insert_counter.pop(key, None)
+
+    await interaction.followup.send("🗑️ Corpus limpiado. Corre /refeed_all para repoblarlo.")
+
+
+@bot.tree.command(name="corpus_info", description="Muestra cuántos mensajes hay en el corpus del canal actual.")
+async def corpus_info_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+
+    if interaction.channel is None:
+        await interaction.response.send_message("No puedo determinar el canal.", ephemeral=True)
+        return
+
+    count = await count_corpus_messages(interaction.guild.id, interaction.channel.id)
+    msg = f"📊 El corpus de este canal tiene {count} mensajes."
+    if count < 50:
+        msg += "\n⚠️ Necesita al menos 50 mensajes para generar bien."
+    await interaction.response.send_message(msg)
+
+
+@bot.tree.command(name="gif_add", description="Agrega un GIF a la colección del servidor.")
+@app_commands.describe(url="URL del GIF (tenor.com, giphy.com o cdn.discordapp.com)")
+async def gif_add_slash(interaction: discord.Interaction, url: str):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    url = url.strip()
+    if "cdn.discordapp.com" in url:
+        final_url = await asyncio.to_thread(upload_gif_to_r2_sync, url, interaction.guild.id)
+        if not final_url:
+            await interaction.followup.send("❌ No se pudo subir el GIF a R2. Comprueba que la URL sea accesible.")
+            return
+    elif "tenor.com" in url or "giphy.com" in url:
+        final_url = url
+    else:
+        await interaction.followup.send("❌ URL no reconocida. Solo se aceptan GIFs de tenor.com, giphy.com o cdn.discordapp.com.")
+        return
+
+    inserted = await save_gif_url(interaction.guild.id, final_url)
+    total = await count_gif_urls(interaction.guild.id)
+    if inserted:
+        await interaction.followup.send(f"✅ GIF guardado. La colección del servidor tiene {total} GIFs en total.")
+    else:
+        await interaction.followup.send(f"ℹ️ Ese GIF ya estaba en la colección. Total: {total} GIFs.")
+
+
+@bot.tree.command(name="youtube_add", description="Suscribe un canal de YouTube para notificaciones en un canal de Discord.")
+@app_commands.describe(
+    youtube_channel_id="ID del canal de YouTube (empieza con UC...)",
+    discord_channel="Canal de Discord donde se avisarán los nuevos videos",
+    rol="Rol a mencionar cuando haya un video nuevo (opcional)",
+)
+async def youtube_add_slash(
+    interaction: discord.Interaction,
+    youtube_channel_id: str,
+    discord_channel: discord.TextChannel,
+    rol: discord.Role | None = None,
+):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=True)
+
+    video = await get_latest_video(youtube_channel_id)
+    if video is None:
+        await interaction.followup.send("❌ No se pudo obtener información del canal. Verifica el ID.")
+        return
+
+    channel_name = video["author"] or youtube_channel_id
+    channel_id = interaction.channel.id if interaction.channel else 0
+
+    added = await add_youtube_sub(
+        interaction.guild.id,
+        channel_id,
+        youtube_channel_id,
+        channel_name,
+        discord_channel.id,
+        mention_role_id=rol.id if rol else None,
+    )
+
+    if added:
+        await update_last_video_id(interaction.guild.id, youtube_channel_id, video["id"])
+        msg = f"✅ Suscrito al canal **{channel_name}**. Los nuevos videos se avisarán en {discord_channel.mention}."
+        if rol:
+            msg += f" Se mencionará a {rol.mention}."
+        await interaction.followup.send(msg)
+    else:
+        await interaction.followup.send(f"ℹ️ Ya estás suscrito al canal **{channel_name}**.")
+
+
+@bot.tree.command(name="youtube_remove", description="Elimina la suscripción a un canal de YouTube.")
+@app_commands.describe(youtube_channel_id="ID del canal de YouTube a eliminar")
+async def youtube_remove_slash(interaction: discord.Interaction, youtube_channel_id: str):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    removed = await remove_youtube_sub(interaction.guild.id, youtube_channel_id)
+    if removed:
+        await interaction.response.send_message(f"✅ Suscripción a `{youtube_channel_id}` eliminada.", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"ℹ️ No había suscripción activa para `{youtube_channel_id}`.", ephemeral=True)
+
+
+@bot.tree.command(name="youtube_list", description="Muestra todas las suscripciones de YouTube activas del servidor.")
+async def youtube_list_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    subs = await list_youtube_subs(interaction.guild.id)
+    if not subs:
+        await interaction.response.send_message("ℹ️ No hay suscripciones de YouTube activas en este servidor.", ephemeral=True)
+        return
+
+    lines = []
+    for sub in subs:
+        dc_channel = interaction.guild.get_channel(sub["discord_channel_id"])
+        dc_mention = dc_channel.mention if dc_channel else f"<#{sub['discord_channel_id']}>"
+        lines.append(f"• **{sub['youtube_channel_name']}** (`{sub['youtube_channel_id']}`) → {dc_mention}")
+
+    await interaction.response.send_message(
+        "**Suscripciones de YouTube activas:**\n" + "\n".join(lines),
+        ephemeral=True,
+    )
+
+
+@bot.tree.command(name="youtube_set_mention", description="Configura el rol a mencionar en las notificaciones de un canal de YouTube.")
+@app_commands.describe(
+    channel_id="ID del canal de YouTube",
+    rol="Rol a mencionar (omitir para quitar la mención)",
+)
+async def youtube_set_mention_slash(
+    interaction: discord.Interaction,
+    channel_id: str,
+    rol: discord.Role | None = None,
+):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+
+    role_id = rol.id if rol else None
+    updated = await set_youtube_mention_role(interaction.guild.id, channel_id, role_id)
+    if not updated:
+        await interaction.response.send_message(f"ℹ️ No se encontró suscripción para `{channel_id}`.", ephemeral=True)
+        return
+
+    if rol:
+        await interaction.response.send_message(
+            f"✅ Las notificaciones de `{channel_id}` mencionarán a {rol.mention}.", ephemeral=True
+        )
+    else:
+        await interaction.response.send_message(
+            f"✅ Mención eliminada de las notificaciones de `{channel_id}`.", ephemeral=True
+        )
+
+
+@bot.tree.command(name="imitar", description="Genera un mensaje imitando el estilo de un usuario del servidor.")
+@app_commands.describe(usuario="Usuario a imitar")
+async def imitar_slash(interaction: discord.Interaction, usuario: discord.Member):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+
+    await interaction.response.defer(thinking=True)
+
+    count = await count_user_messages(interaction.guild.id, usuario.id)
+    if count < 30:
+        await interaction.followup.send(
+            f"⚠️ **{usuario.display_name}** solo tiene {count} mensaje(s) en el corpus. Necesita al menos 30."
+        )
+        return
+
+    result = await generate_markov_for_user(interaction.guild.id, usuario.id)
+    if result is None:
+        await interaction.followup.send(
+            f"⚠️ No se pudo generar un mensaje para **{usuario.display_name}**. Intenta más tarde."
+        )
+        return
+
+    await interaction.followup.send(f'🎭 **{usuario.display_name}** diría: "{result}"')
+
+
+_corpus_ignorar = app_commands.Group(
+    name="corpus_ignorar",
+    description="Gestiona los canales que el bot ignora completamente",
+)
+
+
+@_corpus_ignorar.command(name="add", description="Añade un canal a la lista de ignorados.")
+@app_commands.describe(canal="Canal que el bot debe ignorar")
+async def corpus_ignorar_add(interaction: discord.Interaction, canal: discord.TextChannel):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    added = await add_ignored_channel(interaction.guild.id, canal.id)
+    if added:
+        await interaction.response.send_message(f"✅ {canal.mention} añadido a la lista de ignorados.", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"ℹ️ {canal.mention} ya estaba en la lista de ignorados.", ephemeral=True)
+
+
+@_corpus_ignorar.command(name="quitar", description="Quita un canal de la lista de ignorados.")
+@app_commands.describe(canal="Canal que el bot debe dejar de ignorar")
+async def corpus_ignorar_quitar(interaction: discord.Interaction, canal: discord.TextChannel):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    removed = await remove_ignored_channel(interaction.guild.id, canal.id)
+    if removed:
+        await interaction.response.send_message(f"✅ {canal.mention} quitado de la lista de ignorados.", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"ℹ️ {canal.mention} no estaba en la lista de ignorados.", ephemeral=True)
+
+
+@_corpus_ignorar.command(name="lista", description="Muestra los canales que el bot ignora actualmente.")
+async def corpus_ignorar_lista(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    channel_ids = await list_ignored_channels(interaction.guild.id)
+    if not channel_ids:
+        await interaction.response.send_message("ℹ️ No hay canales ignorados.", ephemeral=True)
+        return
+    lines = [f"• <#{cid}>" for cid in channel_ids]
+    await interaction.response.send_message(
+        "**Canales ignorados:**\n" + "\n".join(lines),
+        ephemeral=True,
+    )
+
+
+bot.tree.add_command(_corpus_ignorar)
+
+
+_meme_auto = app_commands.Group(
+    name="meme_auto",
+    description="Gestiona los memes automáticos por canal",
+)
+
+
+@_meme_auto.command(name="activar", description="Activa memes automáticos en un canal.")
+@app_commands.describe(
+    canal="Canal donde se postarán los memes",
+    intervalo="Intervalo en horas (mínimo 2, máximo 24)",
+)
+async def meme_auto_activar(interaction: discord.Interaction, canal: discord.TextChannel, intervalo: int):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    if intervalo < 2:
+        await interaction.response.send_message("el intervalo mínimo es 2 horas", ephemeral=True)
+        return
+    if intervalo > 24:
+        await interaction.response.send_message("el intervalo máximo es 24 horas", ephemeral=True)
+        return
+    await add_meme_schedule(interaction.guild.id, canal.id, intervalo * 60)
+    await interaction.response.send_message(
+        f"✅ Memes automáticos activados en {canal.mention} cada {intervalo} horas.",
+        ephemeral=True,
+    )
+
+
+@_meme_auto.command(name="desactivar", description="Desactiva los memes automáticos en un canal.")
+@app_commands.describe(canal="Canal donde desactivar los memes automáticos")
+async def meme_auto_desactivar(interaction: discord.Interaction, canal: discord.TextChannel):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    removed = await remove_meme_schedule(interaction.guild.id, canal.id)
+    if removed:
+        await interaction.response.send_message(
+            f"✅ Memes automáticos desactivados en {canal.mention}.",
+            ephemeral=True,
+        )
+    else:
+        await interaction.response.send_message(
+            f"ℹ️ ese canal no tenía memes automáticos",
+            ephemeral=True,
+        )
+
+
+@_meme_auto.command(name="lista", description="Muestra los canales con memes automáticos configurados.")
+async def meme_auto_lista(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    if not has_admin_permission(interaction):
+        await interaction.response.send_message("❌ No tienes permisos para usar este comando.", ephemeral=True)
+        return
+    schedules = await list_meme_schedules(interaction.guild.id)
+    if not schedules:
+        await interaction.response.send_message("ℹ️ no hay canales configurados", ephemeral=True)
+        return
+    lines = []
+    now = datetime.utcnow()
+    for s in schedules:
+        horas = s["interval_minutes"] // 60
+        if s["last_posted_at"] is not None:
+            try:
+                last_dt = datetime.fromisoformat(s["last_posted_at"])
+                delta_h = int((now - last_dt).total_seconds() // 3600)
+                ultimo = f"hace {delta_h} horas"
+            except Exception:
+                ultimo = "desconocido"
+        else:
+            ultimo = "nunca"
+        lines.append(f"• <#{s['channel_id']}> — cada {horas} horas — último: {ultimo}")
+    await interaction.response.send_message(
+        "**Memes automáticos:**\n" + "\n".join(lines),
+        ephemeral=True,
+    )
+
+
+bot.tree.add_command(_meme_auto)
+
+
+@bot.tree.command(name="momo", description="Genera un meme del server.")
+async def momo_slash(interaction: discord.Interaction):
+    import time
+    now = time.time()
+    cooldown_key = (interaction.guild_id or 0, interaction.user.id)
+    last = _momo_cooldowns.get(cooldown_key, 0)
+    if now - last < 45:
+        remaining = int(45 - (now - last))
+        await interaction.response.send_message(
+            f"espera {remaining}s antes de generar otro meme",
+            ephemeral=True
+        )
+        return
+    _momo_cooldowns[cooldown_key] = now
+
+    await interaction.response.defer()
+
+    if not interaction.guild:
+        await interaction.followup.send("Solo en servidores.", ephemeral=True)
+        return
+
+    try:
+        guild_id = interaction.guild.id
+
+        img_bytes = None
+        image_url = None
+        last_img = _last_meme_image.get(guild_id)
+        for _ in range(10):
+            url_candidate = await get_random_image_url_excluding(guild_id, exclude_url=last_img)
+            if not url_candidate:
+                break
+            try:
+                img_resp = await asyncio.to_thread(requests.get, url_candidate, timeout=15)
+                if img_resp.status_code == 200 and len(img_resp.content) <= _MEME_MAX_BYTES:
+                    img_bytes = img_resp.content
+                    image_url = url_candidate
+                    break
+                else:
+                    log.warning("momo: URL inválida (HTTP %s), eliminando del pool: %s", img_resp.status_code, url_candidate)
+                    await delete_image_url(guild_id, url_candidate)
+            except Exception:
+                log.warning("momo: error descargando, eliminando del pool: %s", url_candidate)
+                await delete_image_url(guild_id, url_candidate)
+
+        if not image_url:
+            await interaction.followup.send(
+                "Sin imágenes válidas en el pool. Añade fotos con 🎯.",
+                ephemeral=True,
+            )
+            return
+        _last_meme_image[guild_id] = image_url
+
+        corpus_sample = await get_corpus_messages_filtered(guild_id, min_words=1, limit=400)
+        if not corpus_sample:
+            await interaction.followup.send("El corpus está vacío.", ephemeral=True)
+            return
+
+        caption = await generate_groq_meme_caption(img_bytes, corpus_sample)
+        if caption is None:
+            model = await build_markov_model(guild_id)
+            caption = await asyncio.to_thread(
+                _try_short_sentence, model
+            ) if model and not model.is_empty else None
+
+        if not caption:
+            await interaction.followup.send("No se pudo generar el caption.", ephemeral=True)
+            return
+
+        meme_bytes = await asyncio.to_thread(render_caption, img_bytes, caption)
+        await interaction.followup.send(
+            file=discord.File(io.BytesIO(meme_bytes), filename="meme.png")
+        )
+
+    except Exception:
+        log.exception("momo: error inesperado")
+        await interaction.followup.send("se rompió algo, revisa los logs.", ephemeral=True)
+
+
+@bot.tree.command(name="meme", description="Genera un meme del server.")
+async def meme_slash(interaction: discord.Interaction):
+    await momo_slash.callback(interaction)
+
+
+@bot.tree.command(name="añadir_frase", description="Añade una frase especial al pool del servidor.")
+@app_commands.describe(frase="Frase que el bot puede soltar en cualquier momento")
+async def añadir_frase_slash(interaction: discord.Interaction, frase: str):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    texto = frase.strip()
+    if not texto:
+        await interaction.response.send_message("❌ La frase no puede estar vacía.", ephemeral=True)
+        return
+    await add_frase_especial(interaction.guild.id, interaction.user.id, interaction.user.display_name, texto)
+    await interaction.response.send_message("✅ Frase guardada.")
+
+
+@bot.tree.command(name="ver_frases", description="Lista todas las frases especiales del servidor.")
+async def ver_frases_slash(interaction: discord.Interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    await interaction.response.defer(ephemeral=True)
+    frases = await list_frases_especiales(interaction.guild.id)
+    if not frases:
+        await interaction.followup.send("ℹ️ No hay frases especiales en este servidor.")
+        return
+    lines = [
+        f"`{f['id']}` — \"{f['frase']}\" — {f['user_name']} ({f['created_at'][:10]})"
+        for f in frases
+    ]
+    body = "**Frases especiales:**\n" + "\n".join(lines)
+    if len(body) > 1900:
+        body = body[:1900] + "\n…(lista truncada)"
+    await interaction.followup.send(body)
+
+
+@bot.tree.command(name="borrar_frase", description="Borra una frase especial por su ID.")
+@app_commands.describe(id="ID de la frase a borrar (visible en /ver_frases)")
+async def borrar_frase_slash(interaction: discord.Interaction, id: int):
+    if not interaction.guild:
+        await interaction.response.send_message("Solo en servidores.", ephemeral=True)
+        return
+    frase = await get_frase_especial(interaction.guild.id, id)
+    if frase is None:
+        await interaction.response.send_message("❌ No existe una frase con ese ID en este servidor.", ephemeral=True)
+        return
+    is_admin = (
+        isinstance(interaction.user, discord.Member)
+        and interaction.user.guild_permissions.administrator
+    )
+    if frase["user_id"] != interaction.user.id and not is_admin:
+        await interaction.response.send_message("❌ Solo puedes borrar tus propias frases.", ephemeral=True)
+        return
+    await delete_frase_especial(interaction.guild.id, id)
+    await interaction.response.send_message("✅ Frase borrada.", ephemeral=True)
+
+
+from music_commands import register_music_commands
+register_music_commands(bot)
+
+if __name__ == "__main__":
+    try:
+        bot.run(TOKEN)
+    except discord.errors.LoginFailure:
+        log.critical("Token inválido. Verifica DISCORD_TOKEN en .env.")
+        sys.exit(1)
+</file>
+
+</files>
