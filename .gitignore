@@ -51,3 +51,6 @@ raw/
 # Generated docs
 TECHNICAL_DOC.md
 repomix-output.xml
+
+# Cookies (contienen sesiones, no deben versionarse)
+cookies.txt
