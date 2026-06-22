@@ -17,8 +17,7 @@ venv/
 .idea/
 
 # Database
-data/
-*.db
+data/*.db
 
 # Logs
 *.log

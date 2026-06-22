@@ -5,7 +5,7 @@ import textwrap
 from PIL import Image, ImageDraw, ImageFont
 
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_FONT_PATH = os.path.join(_BASE_DIR, "Impact.ttf")
+_FONT_PATH = os.path.join(_BASE_DIR, "assets", "Impact.ttf")
 
 
 def _try_short_sentence(model, max_chars: int = 80, tries: int = 100) -> str | None:

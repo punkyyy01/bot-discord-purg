@@ -11,4 +11,3 @@ Pillow
 groq
 yt-dlp
 PyNaCl
-davey
