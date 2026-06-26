@@ -16,10 +16,12 @@ from logging.handlers import RotatingFileHandler
 from botocore.config import Config
 from markov_engine import SimpleMarkov
 from meme_generator import render_meme, render_caption, _try_short_sentence
+from gif_gallery import GIF_GALLERY_HTML
 
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
+from aiohttp import web as _web
 from dotenv import load_dotenv
 from db import (
     init_db,
@@ -34,6 +36,8 @@ from db import (
     save_gif_url,
     get_random_gif,
     count_gif_urls,
+    list_gif_urls,
+    delete_gif_url_by_id,
     add_youtube_sub,
     remove_youtube_sub,
     list_youtube_subs,
@@ -75,9 +79,13 @@ GUILD_ID_ENV = os.getenv("GUILD_ID")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 BOT_TRIGGER_NAME = os.getenv("BOT_TRIGGER_NAME", "artemis").strip().lower()
 HOME_GUILD_ID: int | None = int(os.getenv("HOME_GUILD_ID", "0")) or None
+PURGATORY_GUILD_ID = 1434103563214393347
+WEB_PORT = int(os.getenv("WEB_PORT", "8080"))
 
 
 def is_home_guild(guild_id: int | None) -> bool:
+    if guild_id == PURGATORY_GUILD_ID:
+        return True
     if HOME_GUILD_ID is None:
         return False
     return guild_id == HOME_GUILD_ID
@@ -149,7 +157,11 @@ _user_markov_cache: _LRUDict = _LRUDict(64)
 _user_corpus_insert_counter: _LRUDict = _LRUDict(256)
 _momo_cooldowns: dict[tuple[int, int], float] = {}
 _groq_cooldowns: dict[int, float] = {}
+_special_phrase_cooldowns: dict[int, float] = {}
 _last_meme_image: dict[int, str] = {}
+_web_rate_post: dict[str, list[float]] = {}
+_web_rate_delete: dict[str, list[float]] = {}
+_web_runner: "_web.AppRunner | None" = None
 
 _GROQ_GUILD_COOLDOWN = 10.0
 
@@ -158,7 +170,8 @@ _REFEED_MAX_MESSAGES = _env_int("REFEED_MAX_MESSAGES", 80_000)
 _REFEED_ALL_MAX_MESSAGES = _env_int("REFEED_ALL_MAX_MESSAGES", 20_000)
 _MARKOV_TRAINING_MESSAGES = _env_int("MARKOV_TRAINING_MESSAGES", 5_000)
 _USER_MARKOV_TRAINING_MESSAGES = _env_int("USER_MARKOV_TRAINING_MESSAGES", 2_000)
-SPECIAL_PHRASE_PROBABILITY = 0.20
+SPECIAL_PHRASE_PROBABILITY = 0.05
+_SPECIAL_PHRASE_COOLDOWN = 40 * 60  # 40 minutos en segundos
 
 _R2_ENDPOINT = os.getenv("R2_ENDPOINT_URL", "").strip()
 _R2_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
@@ -391,9 +404,13 @@ async def generate_markov_for_user(guild_id: int, author_id: int) -> str | None:
 async def generate_response(guild_id: int) -> tuple[str | None, bool]:
     """Decide entre frase especial o Markov. Retorna (texto, es_especial).
     es_especial=True indica que el texto no debe pasar por post_process_reply."""
-    if random.random() < SPECIAL_PHRASE_PROBABILITY:
+    import time as _time
+    now = _time.monotonic()
+    cooldown_ok = now - _special_phrase_cooldowns.get(guild_id, 0.0) >= _SPECIAL_PHRASE_COOLDOWN
+    if cooldown_ok and random.random() < SPECIAL_PHRASE_PROBABILITY:
         phrase = await get_random_frase_especial(guild_id)
         if phrase:
+            _special_phrase_cooldowns[guild_id] = now
             return phrase, True
     return await generate_markov_reply(guild_id), False
 
@@ -538,6 +555,99 @@ async def handle_meme_command(message: discord.Message) -> None:
         return
 
     await message.reply(file=discord.File(io.BytesIO(meme_bytes), filename="meme.png"))
+
+
+# --- WEB API ---
+
+def _rate_ok(store: dict[str, list[float]], ip: str, limit: int, window: float = 60.0) -> bool:
+    import time as _t
+    now = _t.monotonic()
+    ts = [t for t in store.get(ip, []) if now - t < window]
+    if len(ts) >= limit:
+        store[ip] = ts
+        return False
+    ts.append(now)
+    store[ip] = ts
+    return True
+
+
+def _valid_gif_url(url: str) -> bool:
+    if "tenor.com" in url or "giphy.com" in url:
+        return True
+    pub = _R2_PUBLIC_URL
+    return bool(pub and url.startswith(pub))
+
+
+_CORS = {"Access-Control-Allow-Origin": "*"}
+
+
+@_web.middleware
+async def _cors_middleware(request: _web.Request, handler) -> _web.Response:
+    if request.method == "OPTIONS":
+        return _web.Response(headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+        })
+    response = await handler(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
+
+
+async def _api_gif_list(request: _web.Request) -> _web.Response:
+    gifs = await list_gif_urls(PURGATORY_GUILD_ID)
+    return _web.json_response({"gifs": gifs, "total": len(gifs)})
+
+
+async def _api_gif_add(request: _web.Request) -> _web.Response:
+    ip = request.remote or "unknown"
+    if not _rate_ok(_web_rate_post, ip, 5):
+        return _web.json_response({"error": "rate limit"}, status=429)
+    try:
+        data = await request.json()
+        url = (data.get("url") or "").strip()
+    except Exception:
+        return _web.json_response({"error": "invalid json"}, status=400)
+    if not url or not _valid_gif_url(url):
+        return _web.json_response({"error": "url inválida o no permitida"}, status=400)
+    inserted = await save_gif_url(PURGATORY_GUILD_ID, url)
+    total = await count_gif_urls(PURGATORY_GUILD_ID)
+    return _web.json_response({"inserted": inserted, "total": total})
+
+
+async def _api_gif_delete(request: _web.Request) -> _web.Response:
+    ip = request.remote or "unknown"
+    if not _rate_ok(_web_rate_delete, ip, 3):
+        return _web.json_response({"error": "rate limit"}, status=429)
+    try:
+        gif_id = int(request.match_info["id"])
+    except (KeyError, ValueError):
+        return _web.json_response({"error": "id inválido"}, status=400)
+    deleted = await delete_gif_url_by_id(PURGATORY_GUILD_ID, gif_id)
+    return _web.json_response({"deleted": deleted})
+
+
+async def _api_health(request: _web.Request) -> _web.Response:
+    return _web.json_response({"ok": True})
+
+
+async def _gallery(request: _web.Request) -> _web.Response:
+    return _web.Response(text=GIF_GALLERY_HTML, content_type="text/html", charset="utf-8")
+
+
+async def start_web_server() -> None:
+    global _web_runner
+    app = _web.Application(middlewares=[_cors_middleware])
+    app.router.add_get("/", _gallery)
+    app.router.add_get("/api/gifs", _api_gif_list)
+    app.router.add_post("/api/gifs", _api_gif_add)
+    app.router.add_delete("/api/gifs/{id}", _api_gif_delete)
+    app.router.add_get("/health", _api_health)
+    _web_runner = _web.AppRunner(app)
+    await _web_runner.setup()
+    site = _web.TCPSite(_web_runner, "0.0.0.0", WEB_PORT)
+    await site.start()
+    log.info("Web API iniciada en 0.0.0.0:%s", WEB_PORT)
 
 
 # --- EVENTOS PRINCIPALES ---
@@ -772,6 +882,10 @@ async def on_ready():
         check_youtube.start()
     if not auto_meme_task.is_running():
         auto_meme_task.start()
+    try:
+        await start_web_server()
+    except Exception:
+        log.exception("Error iniciando el servidor web")
 
     if not _r2_available():
         log.warning(

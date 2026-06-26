@@ -320,6 +320,66 @@ async def count_gif_urls(guild_id: int) -> int:
     return int(row[0] if row else 0)
 
 
+async def list_gif_urls(guild_id: int) -> list[dict]:
+    db = await get_db()
+    async with db.execute(
+        "SELECT id, url, created_at FROM corpus_gifs WHERE guild_id=? ORDER BY id",
+        (guild_id,),
+    ) as cursor:
+        rows = await cursor.fetchall()
+    return [{"id": r[0], "url": r[1], "created_at": r[2]} for r in rows]
+
+
+async def delete_gif_url_by_id(guild_id: int, gif_id: int) -> bool:
+    db = await get_db()
+    async with db.execute(
+        "SELECT url FROM corpus_gifs WHERE guild_id=? AND id=?",
+        (guild_id, gif_id),
+    ) as cursor:
+        row = await cursor.fetchone()
+    if not row:
+        return False
+    url = row[0]
+
+    async with _db_lock:
+        cursor = await db.execute(
+            "DELETE FROM corpus_gifs WHERE guild_id=? AND id=?",
+            (guild_id, gif_id),
+        )
+        deleted = cursor.rowcount > 0
+        await db.commit()
+
+    if deleted:
+        r2_public_url = os.getenv("R2_PUBLIC_URL", "").strip()
+        if r2_public_url and url.startswith(r2_public_url):
+            try:
+                import boto3
+                from botocore.config import Config as _BotoConfig
+                _ep = os.getenv("R2_ENDPOINT_URL", "").strip()
+                _kid = os.getenv("R2_ACCESS_KEY_ID", "").strip()
+                _sec = os.getenv("R2_SECRET_ACCESS_KEY", "").strip()
+                _bkt = os.getenv("R2_BUCKET_NAME", "").strip()
+                if _ep and _kid and _sec and _bkt:
+                    _key = url[len(r2_public_url.rstrip("/")) + 1:]
+
+                    def _r2_del():
+                        c = boto3.client(
+                            "s3",
+                            endpoint_url=_ep,
+                            aws_access_key_id=_kid,
+                            aws_secret_access_key=_sec,
+                            config=_BotoConfig(signature_version="s3v4"),
+                            region_name="auto",
+                        )
+                        c.delete_object(Bucket=_bkt, Key=_key)
+
+                    await asyncio.to_thread(_r2_del)
+            except Exception:
+                log.warning("No se pudo eliminar GIF de R2: %s", url)
+
+    return deleted
+
+
 async def add_youtube_sub(
     guild_id: int,
     channel_id: int,
