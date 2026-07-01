@@ -1,3 +1,5 @@
+"""Música: reproducción vía yt-dlp con cola, loop y controles con botones."""
+
 import random
 
 import discord
@@ -5,7 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from music_player import (
-    EMBED_COLOR, LoopMode, SongInfo, fmt_duration, progress_bar,
+    EMBED_COLOR, LoopMode, SongInfo, fmt_duration,
     fetch_song, get_player, remove_player, MediaFetchError, YouTubeNotAllowed,
 )
 
@@ -164,11 +166,29 @@ class QueueView(discord.ui.View):
         await interaction.response.edit_message(embed=self.build_embed(), view=self)
 
 
-def register_music_commands(bot: commands.Bot) -> None:
+class Musica(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
 
-    @bot.tree.command(name="play", description="Reproduce una canción o URL. Si ya hay una, la agrega a la cola.")
+    @commands.Cog.listener()
+    async def on_voice_state_update(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ) -> None:
+        if not self.bot.user or member.id != self.bot.user.id:
+            return
+        if before.channel and not after.channel:
+            player = get_player(member.guild.id)
+            player.voice_client = None
+            player.queue.clear()
+            player.current = None
+            remove_player(member.guild.id)
+
+    @app_commands.command(name="play", description="Reproduce una canción o URL. Si ya hay una, la agrega a la cola.")
     @app_commands.describe(query="Nombre de la canción, artista, o URL de YouTube/SoundCloud")
-    async def play_slash(interaction: discord.Interaction, query: str):
+    async def play(self, interaction: discord.Interaction, query: str):
         vc, err = _voice_check(interaction)
         if err:
             await interaction.response.send_message(
@@ -239,8 +259,8 @@ def register_music_commands(bot: commands.Bot) -> None:
                 embed.set_thumbnail(url=song.thumbnail)
             await interaction.followup.send(embed=embed)
 
-    @bot.tree.command(name="skip", description="Salta a la siguiente canción en la cola.")
-    async def skip_slash(interaction: discord.Interaction):
+    @app_commands.command(name="skip", description="Salta a la siguiente canción en la cola.")
+    async def skip(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -256,8 +276,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             embed=discord.Embed(description="⏭️ Canción saltada.", color=EMBED_COLOR)
         )
 
-    @bot.tree.command(name="stop", description="Detiene la reproducción, vacía la cola y el bot sale del canal.")
-    async def stop_slash(interaction: discord.Interaction):
+    @app_commands.command(name="stop", description="Detiene la reproducción, vacía la cola y el bot sale del canal.")
+    async def stop(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -274,8 +294,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             embed=discord.Embed(description="⏹️ Reproducción detenida y cola vaciada.", color=EMBED_COLOR)
         )
 
-    @bot.tree.command(name="pause", description="Pausa la reproducción actual.")
-    async def pause_slash(interaction: discord.Interaction):
+    @app_commands.command(name="pause", description="Pausa la reproducción actual.")
+    async def pause(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -291,8 +311,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             embed=discord.Embed(description="⏸️ Reproducción pausada.", color=EMBED_COLOR)
         )
 
-    @bot.tree.command(name="resume", description="Reanuda la reproducción pausada.")
-    async def resume_slash(interaction: discord.Interaction):
+    @app_commands.command(name="resume", description="Reanuda la reproducción pausada.")
+    async def resume(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -308,8 +328,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             embed=discord.Embed(description="▶️ Reproducción reanudada.", color=EMBED_COLOR)
         )
 
-    @bot.tree.command(name="queue", description="Muestra la cola de reproducción actual.")
-    async def queue_slash(interaction: discord.Interaction):
+    @app_commands.command(name="queue", description="Muestra la cola de reproducción actual.")
+    async def queue(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -317,9 +337,10 @@ def register_music_commands(bot: commands.Bot) -> None:
         view = QueueView(list(player.queue), player.current)
         await interaction.response.send_message(embed=view.build_embed(), view=view)
 
-    @bot.tree.command(name="volume", description="Ajusta el volumen del reproductor (1-100).")
+    @app_commands.command(name="volume", description="Ajusta el volumen del reproductor (1-100).")
     @app_commands.describe(nivel="Nivel de volumen entre 1 y 100")
-    async def volume_slash(
+    async def volume(
+        self,
         interaction: discord.Interaction,
         nivel: app_commands.Range[int, 1, 100],
     ):
@@ -337,8 +358,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             )
         )
 
-    @bot.tree.command(name="nowplaying", description="Muestra la canción que se está reproduciendo ahora.")
-    async def nowplaying_slash(interaction: discord.Interaction):
+    @app_commands.command(name="nowplaying", description="Muestra la canción que se está reproduciendo ahora.")
+    async def nowplaying(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -354,8 +375,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             view=NowPlayingView(interaction.guild.id),
         )
 
-    @bot.tree.command(name="loop", description="Alterna el modo de loop: sin loop / loop canción / loop cola.")
-    async def loop_slash(interaction: discord.Interaction):
+    @app_commands.command(name="loop", description="Alterna el modo de loop: sin loop / loop canción / loop cola.")
+    async def loop(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -369,8 +390,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             )
         )
 
-    @bot.tree.command(name="shuffle", description="Mezcla aleatoriamente la cola de reproducción.")
-    async def shuffle_slash(interaction: discord.Interaction):
+    @app_commands.command(name="shuffle", description="Mezcla aleatoriamente la cola de reproducción.")
+    async def shuffle(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -389,8 +410,8 @@ def register_music_commands(bot: commands.Bot) -> None:
             )
         )
 
-    @bot.tree.command(name="leave", description="El bot abandona el canal de voz.")
-    async def leave_slash(interaction: discord.Interaction):
+    @app_commands.command(name="leave", description="El bot abandona el canal de voz.")
+    async def leave(self, interaction: discord.Interaction):
         if not interaction.guild:
             await interaction.response.send_message("Solo en servidores.", ephemeral=True)
             return
@@ -407,18 +428,6 @@ def register_music_commands(bot: commands.Bot) -> None:
             embed=discord.Embed(description="👋 Saliendo del canal de voz.", color=EMBED_COLOR)
         )
 
-    async def _on_voice_state_update(
-        member: discord.Member,
-        before: discord.VoiceState,
-        after: discord.VoiceState,
-    ) -> None:
-        if not bot.user or member.id != bot.user.id:
-            return
-        if before.channel and not after.channel:
-            player = get_player(member.guild.id)
-            player.voice_client = None
-            player.queue.clear()
-            player.current = None
-            remove_player(member.guild.id)
 
-    bot.add_listener(_on_voice_state_update, "on_voice_state_update")
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Musica(bot))

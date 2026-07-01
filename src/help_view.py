@@ -1,13 +1,6 @@
 """
-Nuevo /help para Purgito: embed intro + botones de navegación por categoría.
-
-Integración en bot.py:
-    from help_view import register_help_command
-    ...
-    register_help_command(bot)   # después de crear `bot`, antes de bot.run(...)
-
-Si ya existe un @bot.tree.command(name="help", ...) en otro archivo, hay que
-borrarlo (o renombrarlo) para evitar el error de comando duplicado al sincronizar.
+/help de Purgito: embed intro + botones de navegación por categoría.
+El comando en sí vive en cogs/general.py; aquí solo están los embeds y la vista.
 """
 
 import discord
@@ -91,6 +84,8 @@ CATEGORIES = {
         "title": "⚙️ Administración",
         "row": 1,
         "commands": [
+            ("/settings", "panel de configuración del servidor"),
+            ("/setup", "guía de configuración inicial"),
             ("/refeed", "importa mensajes del canal al corpus"),
             ("/refeed_all", "importa todos los canales"),
             ("/corpus_wipe", "borra el corpus del servidor"),
@@ -178,13 +173,3 @@ class HelpView(discord.ui.View):
                 await self.message.edit(view=self)
             except discord.HTTPException:
                 pass
-
-
-def register_help_command(bot: discord.Client) -> None:
-    @bot.tree.command(name="help", description="Muestra los comandos de Purgito y cómo usarlos.")
-    async def help_slash(interaction: discord.Interaction):
-        guild_name = interaction.guild.name if interaction.guild else "este servidor"
-        embed = build_intro_embed(guild_name)
-        view = HelpView(author_id=interaction.user.id, guild_name=guild_name)
-        await interaction.response.send_message(embed=embed, view=view)
-        view.message = await interaction.original_response()

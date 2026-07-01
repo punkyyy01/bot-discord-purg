@@ -4,6 +4,8 @@ import asyncio
 import logging
 import aiosqlite
 
+import r2
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "bot.db")
@@ -156,6 +158,11 @@ async def init_db():
         await _db.commit()
     except Exception:
         log.debug("Columna media_url ya existe en corpus_gifs")
+    try:
+        await _db.execute("ALTER TABLE settings ADD COLUMN locale TEXT")
+        await _db.commit()
+    except Exception:
+        log.debug("Columna locale ya existe en settings")
     await _db.commit()
     flag_path = os.path.join(DATA_DIR, ".images_wiped_v2")
     if not os.path.exists(flag_path):
@@ -186,34 +193,6 @@ def _was_inserted(cursor: aiosqlite.Cursor) -> bool:
     return cursor.rowcount == 1
 
 
-async def _r2_delete_url(url: str) -> None:
-    """Delete an R2 object if the URL belongs to R2. No-op for non-R2 URLs."""
-    r2_pub = os.getenv("R2_PUBLIC_URL", "").strip()
-    if not r2_pub or not url.startswith(r2_pub):
-        return
-    _ep = os.getenv("R2_ENDPOINT_URL", "").strip()
-    _kid = os.getenv("R2_ACCESS_KEY_ID", "").strip()
-    _sec = os.getenv("R2_SECRET_ACCESS_KEY", "").strip()
-    _bkt = os.getenv("R2_BUCKET_NAME", "").strip()
-    if not (_ep and _kid and _sec and _bkt):
-        return
-    key = url[len(r2_pub.rstrip("/")) + 1:]
-    try:
-        import boto3
-        from botocore.config import Config as _BotoConfig
-
-        def _del():
-            boto3.client(
-                "s3", endpoint_url=_ep, aws_access_key_id=_kid,
-                aws_secret_access_key=_sec,
-                config=_BotoConfig(signature_version="s3v4"), region_name="auto",
-            ).delete_object(Bucket=_bkt, Key=key)
-
-        await asyncio.to_thread(_del)
-    except Exception:
-        log.warning("No se pudo eliminar objeto de R2: %s", url)
-
-
 # Settings helpers
 async def set_chat_mode(guild_id: int, enabled: bool, channel_id: int | None = None):
     db = await get_db()
@@ -239,6 +218,26 @@ async def get_chat_settings(guild_id: int):
         if not row:
             return {"enabled": True, "channel_id": None}
         return {"enabled": bool(row[0]), "channel_id": row[1]}
+
+
+async def get_guild_locale(guild_id: int) -> str | None:
+    db = await get_db()
+    async with db.execute(
+        "SELECT locale FROM settings WHERE guild_id=?", (guild_id,)
+    ) as cursor:
+        row = await cursor.fetchone()
+    return row[0] if row and row[0] else None
+
+
+async def set_guild_locale(guild_id: int, locale: str) -> None:
+    db = await get_db()
+    async with _db_lock:
+        await db.execute(
+            "INSERT INTO settings (guild_id, locale) VALUES (?, ?) "
+            "ON CONFLICT(guild_id) DO UPDATE SET locale=excluded.locale",
+            (guild_id, locale),
+        )
+        await db.commit()
 
 
 async def save_corpus_and_user_message(
@@ -360,7 +359,7 @@ async def save_gif_url(guild_id: int, url: str) -> bool:
         inserted = _was_inserted(cursor)
         await db.commit()
     if evicted_url:
-        await _r2_delete_url(evicted_url)
+        await r2.delete_url(evicted_url)
     return inserted
 
 
@@ -746,7 +745,7 @@ async def save_image_url(guild_id: int, url: str) -> bool:
         inserted = _was_inserted(cursor)
         await db.commit()
     if evicted_url:
-        await _r2_delete_url(evicted_url)
+        await r2.delete_url(evicted_url)
     return inserted
 
 

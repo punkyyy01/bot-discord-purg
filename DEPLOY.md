@@ -272,30 +272,18 @@ nano .env
 
 ### Configurar systemd
 
+El unit file canónico vive en el repo: [`deploy/bot-purg.service`](deploy/bot-purg.service).
+
 ```bash
-sudo nano /etc/systemd/system/bot-purg.service
+sudo cp deploy/bot-purg.service /etc/systemd/system/bot-purg.service
 ```
 
-> ⚠️ **Seguridad**: creá un usuario dedicado con `sudo useradd -r -s /bin/false bot-purg` y dale permisos sobre `/opt/bot-discord-purg`.
+> ⚠️ **Seguridad**: crea un usuario dedicado con `sudo useradd -r -s /bin/false bot-purg` y dale permisos sobre `/opt/bot-discord-purg`.
 
-```ini
-[Unit]
-Description=Bot Discord PURG4TORY
-After=network.target
-
-[Service]
-Type=simple
-User=bot-purg
-WorkingDirectory=/opt/bot-discord-purg
-ExecStart=/opt/bot-discord-purg/.venv/bin/python src/bot.py
-Restart=always
-RestartSec=10
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-```
+Claves del unit:
+- `Restart=on-failure` + `RestartSec=15` — reinicio automático si el proceso muere, con espera entre intentos para no entrar en loops agresivos.
+- `StartLimitIntervalSec=0` — systemd nunca deja de reintentar, aunque el problema persista (una caída de red larga no deja el bot muerto de forma permanente).
+- `After=network-online.target` — no arranca antes de tener red.
 
 ```bash
 sudo systemctl daemon-reload

@@ -1,0 +1,25 @@
+# Unit file canónico de Purgito. Copia en el droplet:
+#   sudo cp deploy/bot-purg.service /etc/systemd/system/bot-purg.service
+#   sudo systemctl daemon-reload && sudo systemctl restart bot-purg
+
+[Unit]
+Description=Bot Discord PURG4TORY
+After=network-online.target
+Wants=network-online.target
+# Sin límite de intentos: el bot debe volver solo aunque el problema persista
+# (p. ej. caída de red larga). RestartSec espacia los reintentos para que el
+# loop no sea agresivo.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=bot-purg
+WorkingDirectory=/opt/bot-discord-purg
+ExecStart=/opt/bot-discord-purg/.venv/bin/python src/bot.py
+Restart=on-failure
+RestartSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
